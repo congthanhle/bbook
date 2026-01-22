@@ -1,0 +1,17 @@
+{
+  "app": {
+    "title": "TH_True_Mart",
+    "headerColor": "#34d399",
+    "textColor": "white",
+    "leftButton": "back",
+    "actionBarHidden": true,
+    "hideAndroidBottomNavigationBar": true,
+    "hideIOSSafeAreaBottom": true,
+    "selfControlLoading": false,
+    "statusBar": "normal"
+  },
+  "listCSS": [],
+  "listSyncJS": [],
+  "listAsyncJS": [],
+  "template": {}
+}
