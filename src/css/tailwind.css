@@ -28,6 +28,11 @@
 .ant-form-item {
   @apply mt-3 !important;
 }
+
+.ant-input {
+  @apply h-10 px-4 text-secondary text-base border-none bg-white bg-opacity-80 !important;
+}
+
 .ant-input-disabled {
   @apply bg-white !important;
 }

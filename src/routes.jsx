@@ -10,28 +10,28 @@ const routes = [
     key: 'home',
     component: <HomePage />,
     isRootRouter: true,
-    icon: <TbSmartHome size={32}/>,
+    icon: <TbSmartHome size={30}/>,
   },
   {
     path: '/map',
     key: 'map',
     component: <Map />,
     isRootRouter: true,
-    icon: <TbMap2 size={31}/>,
+    icon: <TbMap2 size={29}/>,
   },
   {
     path: '/ticket',
     key: 'ticket',
     component: <Ticket />,
     isRootRouter: true,
-    icon: <TbTicket size={32}/>,
+    icon: <TbTicket size={30}/>,
   },
   {
     path: '/user',
     key: 'user',
     component: <User />,
     isRootRouter: true,
-    icon: <TbUser size={32}/>,
+    icon: <TbUser size={30}/>,
   },
 ];
 

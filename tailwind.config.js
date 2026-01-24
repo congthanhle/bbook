@@ -12,7 +12,7 @@ module.exports = {
         accent: '#D8F3DC',
       },
       fontFamily: {
-        'sans': ['DINRoundOT', 'sans-serif'],
+        'sans': ['Inter', 'sans-serif'],
       },
     },
   },

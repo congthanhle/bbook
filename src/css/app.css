@@ -8,13 +8,13 @@
     padding: 12px;
     background: #ffffff;
     border-radius: 8px;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 }
 
 .zaui-page {
     @apply font-sans;
     min-height: calc(100vh - 80px) !important;
-    max-height: calc(100vh - 80px) !important;
+    max-height: calc(100vh - 72px) !important;
 }
 
 .zaui-page::-webkit-scrollbar {

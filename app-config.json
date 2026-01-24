@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "TH_True_Mart",
-    "headerColor": "#34d399",
+    "headerColor": "#016f50",
     "textColor": "white",
     "leftButton": "back",
     "actionBarHidden": true,

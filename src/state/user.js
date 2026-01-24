@@ -6,17 +6,13 @@ export const useUserStore = create(
     (set) => ({
       user: null,
       token: null,
-      isAgreed: false,
-      oaId: null,
       setUser: (user) => set({ user }),
       setUserField: (field, value) =>
         set((state) => ({
           user: { ...state.user, [field]: value },
         })),
-      setOaId: (oa_id) => set({ oaId: oa_id }),
-      setIsAgreed: (isAgreed) => set({ isAgreed }),
       setToken: (token) => set({ token }),
-      clearUser: () => set({ user: null, token: null, isAgreed: false, oaId: null }),
+      clearUser: () => set({ user: null, token: null }),
     }),
     {
       name: 'user-storage',
