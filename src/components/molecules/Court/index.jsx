@@ -1,15 +1,23 @@
-import { useState } from 'react';
 import { TbHeart, TbMapPin2, TbClock, TbInfoOctagon } from 'react-icons/tb';
-import { FaInfo } from 'react-icons/fa6';
+import Sheet from '@/components/molecules/Court/sheet';
+import { useSheetStore } from '@/state/sheet';
 
 const index = ({ court }) => {
+  const { openSheet } = useSheetStore();
+
+  const handleShowInfo = () => {
+    openSheet({
+      children: <Sheet />,
+    });
+  };
+
   return (
-    <div className="m-4 shadow-md text-secondary bg-white bg-opacity-70 rounded-xl">
+    <div className="m-4 shadow-md text-secondary bg-white bg-opacity-80 rounded-xl">
       <div className="max-h-24 min-h-24 overflow-hidden rounded-b-xl relative">
         <img src={court?.thumbnail} className="w-full rounded-xl"/>
         <img src={court?.logo} className="w-10 h-10 bg-white absolute top-2 left-2 rounded-lg"/>
         <div className="absolute top-2 right-2 flex gap-2 items-center">
-          <div className="bg-white p-1 rounded-full">
+          <div className="bg-white p-1 rounded-full" onClick={ () => handleShowInfo()}>
             <TbInfoOctagon size={24}/>
           </div>
           <div className="bg-white p-1 rounded-full">
@@ -28,7 +36,7 @@ const index = ({ court }) => {
             <TbClock size={16}/>
             <span className="text-xs">{court?.openHours}</span>
           </div>
-          <div className="text-md text-nowrap px-4 py-1 text-xs uppercase bg-yellow-400 rounded-md">
+          <div className="text-md font-semibold text-nowrap px-4 py-1 text-xs uppercase bg-yellow-400 rounded-md">
             Đặt lịch
           </div>
         </div>

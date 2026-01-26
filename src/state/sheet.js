@@ -2,12 +2,9 @@ import { create } from 'zustand';
 
 export const useSheetStore = create((set) => ({
   visible: false,
-  title: '',
   children: null,
-  swipeToClose: false,
-  setSwipeToClose: (swipeToClose) => set({ swipeToClose }),
-  openSheet: ({ title = '', children }) =>
-    set({ visible: true, title, children }),
+  openSheet: ({ children }) =>
+    set({ visible: true, children }),
   closeSheet: () =>
-    set({ visible: false, title: '', children: null, swipeToClose: false }),
+    set({ visible: false, children: null }),
 }));
