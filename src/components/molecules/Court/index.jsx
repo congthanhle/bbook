@@ -1,8 +1,10 @@
 import { TbHeart, TbMapPin2, TbClock, TbInfoOctagon } from 'react-icons/tb';
 import Sheet from '@/components/molecules/Court/Sheet';
 import { useSheetStore } from '@/state/sheet';
+import { useNavigate } from 'react-router-dom';
 
 const index = ({ court }) => {
+  const navigate = useNavigate();
   const { openSheet } = useSheetStore();
 
   const handleShowInfo = () => {
@@ -36,7 +38,10 @@ const index = ({ court }) => {
             <TbClock size={16}/>
             <span className="text-xs">{court?.openHours}</span>
           </div>
-          <button className="text-md font-semibold text-nowrap px-4 py-1 text-xs uppercase bg-yellow-400 rounded-md">
+          <button
+            className="text-md font-semibold text-nowrap px-4 py-1 text-xs uppercase bg-yellow-400 rounded-md"
+            onClick={() => navigate(`/booking/${court.id}`)}
+          >
             Đặt lịch
           </button>
         </div>
