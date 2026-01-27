@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 const Price = ({ item }) => {
   return (
     <div className="px-2">

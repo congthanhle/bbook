@@ -1,11 +1,9 @@
-import { useState } from 'react';
-
-const Service = () => {
+const Price = ({ item }) => {
   return (
-    <>
-
-    </>
+    <div className="px-2">
+      <div dangerouslySetInnerHTML={{ __html: item }} />
+    </div>
   );
 };
 
-export default Service;
+export default Price;

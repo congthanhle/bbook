@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 const Policy = ({ item }) => {
   return (
     <div className="p-2">

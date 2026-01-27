@@ -12,10 +12,21 @@ import CustomSheet from '@/components/atoms/Sheet';
 
 dayjs.locale('vi');
 
+const theme = {
+  components: {
+    Rate: {
+      starSize: 10,
+    },
+  },
+};
+
 const MyApp = () => {
   return (
     <App>
-      <ConfigProvider locale={viVN}>
+      <ConfigProvider
+        theme={theme}
+        locale={viVN}
+      >
         <SnackbarProvider>
           <div className="min-h-screen bg-gradient-to-b from-emerald-400 to-teal-700">
             <Loading/>

@@ -93,19 +93,49 @@ export const courtItem = {
         </tr>
       </tbody>
     </table>`,
-  services: [
-    { id: 1, name: 'Thuê vợt cầu lông', price: '20.000 đ' },
-    { id: 2, name: 'Thuê giày cầu lông', price: '30.000 đ' },
-    { id: 3, name: 'Bán cầu lông', price: '50.000 đ/ hộp' },
-  ],
+  services:`
+  <table style="width:100%; border-collapse:collapse;">
+    <tr>
+      <td style="padding-block:8px;">
+        Ống cầu Yonex
+      </td>
+      <td style="padding-block:8px; text-align:right;">
+        320.000đ
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-block:8px;">
+        Ống cầu Victor
+      </td>
+      <td style="padding-block:8px; text-align:right;">
+        290.000đ
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-block:8px;">
+        Thuê vợt cầu lông
+      </td>
+      <td style="padding-block:8px; text-align:right;">
+        30.000đ / trận
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-block:8px;">
+        Nước suối / Trà đá
+      </td>
+      <td style="padding-block:8px; text-align:right;">
+        10.000đ
+      </td>
+    </tr>
+  </table>`,
   rules: 'Badminton rules involve hitting a shuttlecock over a net, aiming to land it in the opponent\'s court; matches are best-of-three games to 21 points, with rally scoring (a point on every serve) and needing a two-point lead to win (or first to 30 if tied at 29-29). Key rules include serving diagonally, hitting the shuttle only once, not touching the net or lines during the serve, and players changing ends at intervals, with the shuttle not allowed to bounce. ',
   rates: {
     average: 4.8,
-    totalRates: 124,
+    totalRates: 3,
     ratings: [
-      { id: 1, user: 'Nguyen Van A', score: 5, comment: 'Sân rất đẹp và nhân viên thân thiện!' },
-      { id: 2, user: 'Tran Thi B', score: 4, comment: 'Giá cả hợp lý, sẽ quay lại.' },
-      { id: 3, user: 'Le Van C', score: 5, comment: 'Tuyệt vời cho những buổi chơi cầu lông cuối tuần.' },
+      { id: 1, avatar: 'https://cdn-icons-png.flaticon.com/128/4727/4727424.png', user: 'Nguyen Van A', score: 5.0, comment: 'Sân rất đẹp và nhân viên thân thiện!' },
+      { id: 2, avatar: 'https://cdn-icons-png.flaticon.com/128/4727/4727424.png', user: 'Tran Thi B', score: 4.5, comment: 'Giá cả hợp lý, sẽ quay lại.' },
+      { id: 3, avatar: 'https://cdn-icons-png.flaticon.com/128/4727/4727424.png', user: 'Le Van C', score: 3, comment: 'Sân cầu lông sạch sẽ, trần cao, ánh sáng tốt. Sàn không trơn trượt, đánh lâu không bị mỏi chân. Có chỗ để xe rộng, nước uống đầy đủ. Mình đánh ở đây thường xuyên. Sân ổn định, giờ cao điểm hơi đông nhưng quản lý sắp xếp khá tốt. Sẽ quay lại.' },
     ]
   }
 };

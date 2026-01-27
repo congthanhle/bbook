@@ -32,7 +32,7 @@ const CustomSheet = () => {
       >
         <div className="absolute h-1 w-16 -top-4 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 z-[1001]"></div>
 
-        <div className="relative text-secondary rounded-t-2xl min-h-[calc(90vh-32px)] max-h-[calc(90vh-32px)]">
+        <div className="relative text-secondary rounded-t-2xl min-h-[90vh] max-h-[90vh]">
           {children}
         </div>
       </div>
