@@ -47,58 +47,53 @@ export const courtItem = {
     'https://hvshop.vn/wp-content/uploads/2024/10/san-cau-long-duc-thao-7.webp',
     'https://hvshop.vn/wp-content/uploads/2024/10/san-cau-long-duc-thao.webp'
   ],
-  rental: [
-    {
-      id: 1,
-      content: `
-      <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-        <thead>
-          <tr style="background:#f5f5f5;">
-            <th>Thứ</th>
-            <th>Khung giờ</th>
-            <th>Cố định</th>
-            <th>Vãng lai</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td rowspan="2"><strong>Thứ 2</strong></td>
-            <td>05:00 - 16:00</td>
-            <td align="right">60.000 đ</td>
-            <td align="right">70.000 đ</td>
-          </tr>
-          <tr>
-            <td>16:00 - 22:00</td>
-            <td align="right">90.000 đ</td>
-            <td align="right">100.000 đ</td>
-          </tr>
-          <tr>
-            <td rowspan="2"><strong>Thứ 3</strong></td>
-            <td>05:00 - 16:00</td>
-            <td align="right">60.000 đ</td>
-            <td align="right">70.000 đ</td>
-          </tr>
-          <tr>
-            <td>16:00 - 22:00</td>
-            <td align="right">90.000 đ</td>
-            <td align="right">100.000 đ</td>
-          </tr>
-          <tr>
-            <td rowspan="2"><strong>Thứ 7</strong></td>
-            <td>05:00 - 16:00</td>
-            <td align="right">80.000 đ</td>
-            <td align="right">90.000 đ</td>
-          </tr>
-          <tr>
-            <td>16:00 - 22:00</td>
-            <td align="right">120.000 đ</td>
-            <td align="right">140.000 đ</td>
-          </tr>
-        </tbody>
-      </table>`
-    }
-  ],
-  service: [
+  rental: `
+    <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr style="background:#f5f5f5;">
+          <th>Thứ</th>
+          <th>Khung giờ</th>
+          <th>Cố định</th>
+          <th>Vãng lai</th>
+        </tr>
+      </thead>
+      <tbody class="text-center">
+        <tr>
+          <td rowspan="2"><strong>Thứ 2</strong></td>
+          <td>05:00 - 16:00</td>
+          <td>60.000 đ</td>
+          <td>70.000 đ</td>
+        </tr>
+        <tr>
+          <td>16:00 - 22:00</td>
+          <td>90.000 đ</td>
+          <td>100.000 đ</td>
+        </tr>
+        <tr>
+          <td rowspan="2"><strong>Thứ 3</strong></td>
+          <td>05:00 - 16:00</td>
+          <td>60.000 đ</td>
+          <td>70.000 đ</td>
+        </tr>
+        <tr>
+          <td>16:00 - 22:00</td>
+          <td>90.000 đ</td>
+          <td>100.000 đ</td>
+        </tr>
+        <tr>
+          <td rowspan="2"><strong>Thứ 7</strong></td>
+          <td>05:00 - 16:00</td>
+          <td>80.000 đ</td>
+          <td>90.000 đ</td>
+        </tr>
+        <tr>
+          <td>16:00 - 22:00</td>
+          <td>120.000 đ</td>
+          <td>140.000 đ</td>
+        </tr>
+      </tbody>
+    </table>`,
+  services: [
     { id: 1, name: 'Thuê vợt cầu lông', price: '20.000 đ' },
     { id: 2, name: 'Thuê giày cầu lông', price: '30.000 đ' },
     { id: 3, name: 'Bán cầu lông', price: '50.000 đ/ hộp' },

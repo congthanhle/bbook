@@ -1,5 +1,5 @@
 import { TbHeart, TbMapPin2, TbClock, TbInfoOctagon } from 'react-icons/tb';
-import Sheet from '@/components/molecules/Court/sheet';
+import Sheet from '@/components/molecules/Court/Sheet';
 import { useSheetStore } from '@/state/sheet';
 
 const index = ({ court }) => {
@@ -36,9 +36,9 @@ const index = ({ court }) => {
             <TbClock size={16}/>
             <span className="text-xs">{court?.openHours}</span>
           </div>
-          <div className="text-md font-semibold text-nowrap px-4 py-1 text-xs uppercase bg-yellow-400 rounded-md">
+          <button className="text-md font-semibold text-nowrap px-4 py-1 text-xs uppercase bg-yellow-400 rounded-md">
             Đặt lịch
-          </div>
+          </button>
         </div>
       </div>
     </div>

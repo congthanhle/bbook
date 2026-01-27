@@ -28,7 +28,7 @@ const CustomSheet = () => {
       handler={false}
     >
       <div
-        className="overflow-visible max-h-[90vh] min-h-[40vh] rounded-2xl bg-white"
+        className="overflow-visible max-h-[90vh] min-h-[40vh] rounded-2xl bg-gray-100"
       >
         <div className="absolute h-1 w-16 -top-4 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 z-[1001]"></div>
 
