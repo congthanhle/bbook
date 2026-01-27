@@ -12,8 +12,8 @@ const index = ({ court }) => {
   };
 
   return (
-    <div className="m-4 shadow-md text-secondary bg-white bg-opacity-80 rounded-xl">
-      <div className="max-h-24 min-h-24 overflow-hidden rounded-b-xl relative">
+    <div className="shadow-md text-secondary bg-white bg-opacity-90 rounded-xl">
+      <div className="max-h-28 min-h-28 overflow-hidden rounded-b-xl relative">
         <img src={court?.thumbnail} className="w-full rounded-xl"/>
         <img src={court?.logo} className="w-10 h-10 bg-white absolute top-2 left-2 rounded-lg"/>
         <div className="absolute top-2 right-2 flex gap-2 items-center">

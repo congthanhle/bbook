@@ -40,7 +40,7 @@ const index = () => {
           </div>
         </div>
       </div>
-      <div className="w-full space-y-4 max-h-[calc(100vh-250px)] overflow-y-auto mt-2">
+      <div className="w-full space-y-3 max-h-[calc(100vh-254px)] overflow-y-auto mt-2 px-3">
         {
           courtList.map((court, index) => (
             <CourtCard key={index} court={court} />

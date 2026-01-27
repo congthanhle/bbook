@@ -25,7 +25,7 @@ const BottomNavigation = () => {
                     key={route.key}
                     className={clsx(
                       'flex items-center justify-center relative text-3xl flex-1 h-full rounded-xl text-white',
-                      isRouteActive(route.path) ? 'bg-emerald-800 bg-opacity-80' : ''
+                      isRouteActive(route.path) ? 'bg-gradient-to-r from-emerald-600 to-teal-800' : ''
                     )}
                     onClick={() => navigate(route.path)}
                   >
