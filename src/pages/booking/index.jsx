@@ -24,8 +24,8 @@ const BadmintonCourtBooking = () => {
     '0-2', '0-5', '1-3', '2-8', '3-10', '4-6', '5-12'
   ]);
 
-  const cellHeight = 40;
-  const headerHeight = 70;
+  const cellHeight = 70;
+  const headerHeight = 50;
   const leftColumnWidth = 100;
   const padding = 10;
 
@@ -37,20 +37,20 @@ const BadmintonCourtBooking = () => {
     setScrollLeft(e.target.scrollLeft);
   };
 
-  // Màu sắc
+  // Màu sắc Excel-like
   const colors = {
     primary: '#00D9FF',
     secondary: '#FF6B9D',
-    background: '#0F1419',
-    surface: '#1A2028',
-    cellBg: '#9E9E9E',        // Xám - Đang trống
-    hover: '#BDBDBD',          // Xám sáng - Hover
-    booked: '#F44336',         // Đỏ - Khóa
-    selected: '#2196F3',       // Xanh - Đang chọn
-    text: '#E8EAED',
-    textSecondary: '#8B95A1',
-    border: '#3A424D',
-    gridLine: '#2A3139'
+    background: '#FFFFFF',
+    surface: '#F8F9FA',
+    cellBg: '#FFFFFF',         // Trắng - Đang trống
+    hover: '#E3F2FD',          // Xanh nhạt - Hover
+    booked: '#FFEBEE',         // Đỏ nhạt - Khóa
+    selected: '#BBDEFB',       // Xanh nhạt - Đang chọn
+    text: '#212121',
+    textSecondary: '#757575',
+    border: '#E0E0E0',
+    gridLine: '#BDBDBD'
   };
 
   const handleSlotClick = (courtIndex, timeIndex) => {
@@ -75,6 +75,13 @@ const BadmintonCourtBooking = () => {
     if (hoveredSlot === slotId) return colors.hover;
 
     return colors.cellBg;
+  };
+
+  const getTimeRange = (timeIndex) => {
+    const startTime = timeSlots[timeIndex];
+    const endHour = parseInt(startTime.split(':')[0]) + 1;
+    const endTime = `${endHour.toString().padStart(2, '0')}:00`;
+    return `${startTime}-${endTime}`;
   };
 
   return (
@@ -113,36 +120,98 @@ const BadmintonCourtBooking = () => {
                     fill={colors.surface}
                   />
                   {timeSlots.map((time, index) => (
-                    <Group key={`header-${index}`}>
+                    <Group key={`time-${index}`}>
                       <Rect
                         x={index * cellWidth}
-                        y={padding}
+                        y={0}
                         width={cellWidth}
-                        height={headerHeight - padding}
-                        fill={colors.cellBg}
-                        cornerRadius={8}
-                      />
-                      <Text
-                        x={index * cellWidth}
-                        y={padding}
-                        width={cellWidth}
-                        height={headerHeight - padding}
-                        text={time}
-                        fontSize={14}
-                        fontFamily='"SF Pro Display", -apple-system, sans-serif'
-                        fontStyle='600'
-                        fill={colors.text}
-                        align='center'
-                        verticalAlign='middle'
+                        height={headerHeight}
+                        fill={colors.surface}
+                        stroke={colors.border}
+                        strokeWidth={1}
                       />
                     </Group>
                   ))}
+
+                  {/* First time marker at the start */}
+                  <Rect
+                    x={2}
+                    y={(headerHeight - 24) / 2}
+                    width={45}
+                    height={24}
+                    fill='#FFFFFF'
+                    cornerRadius={4}
+                  />
+                  <Text
+                    x={2}
+                    y={(headerHeight - 24) / 2}
+                    width={45}
+                    height={24}
+                    text={timeSlots[0]}
+                    fontSize={12}
+                    fontFamily='"SF Pro Display", -apple-system, sans-serif'
+                    fontStyle='600'
+                    fill={colors.text}
+                    align='center'
+                    verticalAlign='middle'
+                  />
+
+                  {/* Middle time markers on borders */}
+                  {timeSlots.slice(1).map((time, idx) => {
+                    const index = idx + 1;
+                    return (
+                      <Group key={`time-marker-${index}`}>
+                        <Rect
+                          x={index * cellWidth - 22.5}
+                          y={(headerHeight - 24) / 2}
+                          width={45}
+                          height={24}
+                          fill='#FFFFFF'
+                          cornerRadius={4}
+                        />
+                        <Text
+                          x={index * cellWidth - 22.5}
+                          y={(headerHeight - 24) / 2}
+                          width={45}
+                          height={24}
+                          text={time}
+                          fontSize={12}
+                          fontFamily='"SF Pro Display", -apple-system, sans-serif'
+                          fontStyle='600'
+                          fill={colors.text}
+                          align='center'
+                          verticalAlign='middle'
+                        />
+                      </Group>
+                    );
+                  })}
+
+                  {/* End time marker */}
+                  <Rect
+                    x={timeSlots.length * cellWidth - 22.5}
+                    y={(headerHeight - 24) / 2}
+                    width={45}
+                    height={24}
+                    fill='#FFFFFF'
+                    cornerRadius={4}
+                  />
+                  <Text
+                    x={timeSlots.length * cellWidth - 22.5}
+                    y={(headerHeight - 24) / 2}
+                    width={45}
+                    height={24}
+                    text='23:00'
+                    fontSize={12}
+                    fontFamily='"SF Pro Display", -apple-system, sans-serif'
+                    fontStyle='600'
+                    fill={colors.text}
+                    align='center'
+                    verticalAlign='middle'
+                  />
                 </Layer>
               </Stage>
             </div>
           </div>
-
-          {/* Fixed Left Column - Court Names */}
           <div className="absolute left-0 z-20 overflow-hidden" style={{ top: headerHeight, width: leftColumnWidth, height: 'calc(100vh - 400px)', maxHeight: gridHeight }}>
             <div style={{ transform: `translateY(-${scrollTop}px)`, height: gridHeight }}>
               <Stage width={leftColumnWidth} height={gridHeight}>
@@ -157,20 +226,21 @@ const BadmintonCourtBooking = () => {
                   {courts.map((court, index) => (
                     <Group key={`court-${index}`}>
                       <Rect
-                        x={padding}
+                        x={0}
                         y={index * cellHeight}
-                        width={leftColumnWidth - padding}
+                        width={leftColumnWidth}
                         height={cellHeight}
-                        fill={colors.cellBg}
-                        cornerRadius={6}
+                        fill={colors.surface}
+                        stroke={colors.border}
+                        strokeWidth={1}
                       />
                       <Text
-                        x={padding}
+                        x={0}
                         y={index * cellHeight}
-                        width={leftColumnWidth - padding}
+                        width={leftColumnWidth}
                         height={cellHeight}
                         text={court}
-                        fontSize={16}
+                        fontSize={14}
                         fontFamily='"SF Pro Display", -apple-system, sans-serif'
                         fontStyle='600'
                         fill={colors.text}
@@ -248,15 +318,13 @@ const BadmintonCourtBooking = () => {
                     return (
                       <Group key={slotId}>
                         <Rect
-                          x={timeIndex * cellWidth + 2}
-                          y={courtIndex * cellHeight + 2}
-                          width={cellWidth - 4}
-                          height={cellHeight - 4}
+                          x={timeIndex * cellWidth}
+                          y={courtIndex * cellHeight}
+                          width={cellWidth}
+                          height={cellHeight}
                           fill={getSlotColor(courtIndex, timeIndex)}
-                          cornerRadius={8}
-                          shadowColor='rgba(0,0,0,0.2)'
-                          shadowBlur={isSelected ? 10 : 0}
-                          shadowOffset={{ x: 0, y: 2 }}
+                          stroke={colors.border}
+                          strokeWidth={1}
                           onClick={() => handleSlotClick(courtIndex, timeIndex)}
                           onTap={() => handleSlotClick(courtIndex, timeIndex)}
                           onMouseEnter={() => !isBooked && setHoveredSlot(slotId)}
@@ -274,7 +342,7 @@ const BadmintonCourtBooking = () => {
                             text={isBooked ? '✕' : '✓'}
                             fontSize={20}
                             fontStyle='bold'
-                            fill='white'
+                            fill={isBooked ? '#D32F2F' : '#1976D2'}
                             align='center'
                             verticalAlign='middle'
                             listening={false}
