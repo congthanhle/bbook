@@ -46,8 +46,8 @@ const MyApp = () => {
                   />)}
               </Routes>
               <BottomNavigation />
+              <CustomSheet />
             </ZMPRouter>
-            <CustomSheet />
           </div>
         </SnackbarProvider>
       </ConfigProvider>

@@ -6,8 +6,12 @@ import Image from '@/components/molecules/Court/Image';
 import Service from '@/components/molecules/Court/Service';
 import Rating from '@/components/molecules/Court/Rating';
 import Policy from '@/components/molecules/Court/Policy';
+import { useNavigate } from 'react-router-dom';
+import { useSheetStore } from '@/state/sheet';
 
 const sheet = ({ court = courtItem }) => {
+  const navigate = useNavigate();
+  const { closeSheet } = useSheetStore();
 
   const items = [
     { key: '1', label: 'Bảng giá', children: <Price item={courtItem.rental}/> },
@@ -16,6 +20,11 @@ const sheet = ({ court = courtItem }) => {
     { key: '4', label: 'Đánh giá', children: <Rating item={courtItem.rates.ratings}/> },
     { key: '5', label: 'Quy định', children: <Policy item={courtItem.rules}/> },
   ];
+
+  const handleBooking = () => {
+    closeSheet();
+    navigate(`/booking/${court.id}`);
+  };
 
   return (
     <div className="w-full">
@@ -29,6 +38,12 @@ const sheet = ({ court = courtItem }) => {
             <TbHeart size={24}/>
           </div>
         </div>
+        <button
+          className="absolute top-3 right-3 text-md font-semibold text-nowrap px-4 py-2 text-xs uppercase bg-yellow-400 rounded-md"
+          onClick={handleBooking}
+        >
+            Đặt lịch
+        </button>
         <div className="absolute -bottom-16 left-0 px-4 w-full">
           <div className="bg-white bg-opacity-95 rounded-md w-full p-3 ">
             <div className="flex items-center gap-3">
