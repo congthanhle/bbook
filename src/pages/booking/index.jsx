@@ -7,7 +7,7 @@ const BadmintonCourtBooking = () => {
 
   // ==================== STATE MANAGEMENT ====================
   const [selectedSlots, setSelectedSlots] = useState(new Set());
-  const [cellWidth, setCellWidth] = useState(90);
+  const [cellWidth, setCellWidth] = useState(50);
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef(null);
 
@@ -23,9 +23,9 @@ const BadmintonCourtBooking = () => {
   ]);
 
   // ==================== LAYOUT DIMENSIONS ====================
-  const cellHeight = 70;
+  const cellHeight = 60;
   const labelPadding = 30; // Padding for first time label
-  const endPadding = 5; // Minimal padding after last label
+  const endPadding = 64; // Padding after last label to make 23:00 visible
 
   // ==================== COLOR SCHEME ====================
   const colors = {
@@ -81,7 +81,7 @@ const BadmintonCourtBooking = () => {
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden font-sans bg-white">
       {/* Header */}
-      <div className="bg-emerald-700">
+      <div className="bg-emerald-700 pb-4">
         <div className="flex justify-between items-center gap-4 p-3">
           <TbChevronLeft
             size={28}
@@ -91,19 +91,27 @@ const BadmintonCourtBooking = () => {
           <p className="text-white text-center font-semibold text-base">Đặt lịch</p>
           <div className="w-6"></div>
         </div>
+        <div className="flex gap-4 mt-3 justify-center flex-wrap text-white">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded" />
+            <span className="text-sm">Trống</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: colors.selected }} />
+            <span className="text-sm">Đang chọn</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: colors.booked }} />
+            <span className="text-sm">Đã đặt</span>
+          </div>
+        </div>
       </div>
-
-      {/* Main Grid Container */}
       <div className="flex-1 overflow-hidden relative">
-        {/* Fixed Headers Container */}
         <div className="absolute top-0 left-0 right-0 z-10 flex pointer-events-none" style={{ height: '50px' }}>
-          {/* Top-left corner */}
           <div
             className="flex-shrink-0 bg-gray-100 border-b border-r border-gray-300"
             style={{ width: '70px', height: '50px' }}
           />
-
-          {/* Time header - syncs with scroll */}
           <div className="flex-1 overflow-hidden relative">
             <div
               className="absolute inset-0 overflow-hidden"
@@ -134,12 +142,11 @@ const BadmintonCourtBooking = () => {
                       zIndex: 10
                     }}
                   >
-                    <span className="text-xs font-semibold text-gray-700 bg-white px-2 py-1 rounded shadow-sm">
+                    <span className="text-sm font-semibold text-gray-700 px-2 py-1 rounded shadow-sm">
                       {time}
                     </span>
                   </div>
                 ))}
-                {/* Last time label (23:00) */}
                 <div
                   className="absolute flex items-center justify-center"
                   style={{
@@ -149,11 +156,11 @@ const BadmintonCourtBooking = () => {
                     zIndex: 10
                   }}
                 >
-                  <span className="text-xs font-semibold text-gray-700 bg-white px-2 py-1 rounded shadow-sm">
+                  <span className="text-xs font-semibold text-gray-700 px-2 py-1 rounded shadow-sm">
                     23:00
                   </span>
                 </div>
-                {/* Vertical grid lines in header - ALL lines including first */}
+
                 {[...Array(timeSlots.length + 1)].map((_, index) => (
                   <div
                     key={`header-line-${index}`}
@@ -174,7 +181,7 @@ const BadmintonCourtBooking = () => {
               {courts.map((court, index) => (
                 <div
                   key={`court-${index}`}
-                  className="flex-shrink-0 flex items-center justify-center bg-gray-100 border-b border-r border-gray-300 font-semibold text-sm text-gray-700"
+                  className="flex-shrink-0 flex items-center justify-center bg-teal-100 border-b border-r border-gray-300 font-semibold text-sm text-gray-700"
                   style={{ height: `${cellHeight}px` }}
                 >
                   {court}
@@ -204,8 +211,7 @@ const BadmintonCourtBooking = () => {
                     return (
                       <div
                         key={slotId}
-                        className={`flex-shrink-0 flex items-center justify-center border-b border-r border-gray-300 transition-colors ${
-                          !isBooked ? 'cursor-pointer active:opacity-70' : 'cursor-not-allowed'
+                        className={`flex-shrink-0 flex items-center justify-center border-b border-r border-gray-300 transition-colors ${timeIndex === 0 ? 'border-l' : ''} ${!isBooked ? 'cursor-pointer active:opacity-70' : 'cursor-not-allowed'
                         }`}
                         style={{
                           width: `${cellWidth}px`,
@@ -217,8 +223,7 @@ const BadmintonCourtBooking = () => {
                       >
                         {(isBooked || isSelected) && (
                           <span
-                            className={`text-xl font-bold ${
-                              isBooked ? 'text-red-600' : 'text-blue-600'
+                            className={`text-xl font-bold ${isBooked ? 'text-red-600' : 'text-blue-600'
                             }`}
                           >
                             {getSlotIcon(courtIndex, timeIndex)}
@@ -240,7 +245,7 @@ const BadmintonCourtBooking = () => {
           <span className="text-xs text-gray-500">Zoom</span>
           <input
             type="range"
-            min="60"
+            min="50"
             max="150"
             step="5"
             value={cellWidth}
@@ -252,23 +257,6 @@ const BadmintonCourtBooking = () => {
           />
           <span className="text-xs text-gray-500">{cellWidth}px</span>
         </div>
-
-        {/* Legend */}
-        <div className="flex gap-4 mt-3 justify-center flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded" />
-            <span className="text-xs text-gray-600">Trống</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: colors.selected }} />
-            <span className="text-xs text-gray-600">Đang chọn</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: colors.booked }} />
-            <span className="text-xs text-gray-600">Đã đặt</span>
-          </div>
-        </div>
-
         {/* Book button */}
         {selectedSlots.size > 0 && (
           <button
@@ -279,32 +267,6 @@ const BadmintonCourtBooking = () => {
           </button>
         )}
       </div>
-
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        
-        input[type='range']::-webkit-slider-thumb {
-          appearance: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: #10b981;
-          cursor: pointer;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        input[type='range']::-moz-range-thumb {
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: #10b981;
-          cursor: pointer;
-          border: none;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-      `}</style>
     </div>
   );
 };
