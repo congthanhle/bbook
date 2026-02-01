@@ -1,60 +1,57 @@
 import { useState, useRef } from 'react';
 import { TbChevronLeft } from 'react-icons/tb';
 import { useNavigate } from 'react-router-dom';
-import { Stage, Layer, Rect, Text, Group, Line } from 'react-konva';
 
 const BadmintonCourtBooking = () => {
   const navigate = useNavigate();
+
+  // ==================== STATE MANAGEMENT ====================
   const [selectedSlots, setSelectedSlots] = useState(new Set());
-  const [hoveredSlot, setHoveredSlot] = useState(null);
   const [cellWidth, setCellWidth] = useState(90);
-  const [scrollTop, setScrollTop] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const stageRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
+  // ==================== DATA CONFIGURATION ====================
   const courts = ['Sân 1', 'Sân 2', 'Sân 3', 'Sân 4', 'Sân 5', 'Sân 6'];
   const timeSlots = [
     '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
     '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
     '18:00', '19:00', '20:00', '21:00', '22:00'
   ];
-
   const bookedSlots = new Set([
     '0-2', '0-5', '1-3', '2-8', '3-10', '4-6', '5-12'
   ]);
 
+  // ==================== LAYOUT DIMENSIONS ====================
   const cellHeight = 70;
-  const headerHeight = 50;
-  const leftColumnWidth = 100;
-  const padding = 10;
+  const labelPadding = 30; // Padding for first time label
+  const endPadding = 5; // Minimal padding after last label
 
-  const gridWidth = timeSlots.length * cellWidth;
-  const gridHeight = courts.length * cellHeight;
-
-  const handleScroll = (e) => {
-    setScrollTop(e.target.scrollTop);
-    setScrollLeft(e.target.scrollLeft);
+  // ==================== COLOR SCHEME ====================
+  const colors = {
+    cellBg: '#FFFFFF',
+    booked: '#FFEBEE',
+    selected: '#BBDEFB',
+    border: '#E0E0E0',
+    surface: '#F8F9FA',
   };
 
-  // Màu sắc Excel-like
-  const colors = {
-    primary: '#00D9FF',
-    secondary: '#FF6B9D',
-    background: '#FFFFFF',
-    surface: '#F8F9FA',
-    cellBg: '#FFFFFF',         // Trắng - Đang trống
-    hover: '#E3F2FD',          // Xanh nhạt - Hover
-    booked: '#FFEBEE',         // Đỏ nhạt - Khóa
-    selected: '#BBDEFB',       // Xanh nhạt - Đang chọn
-    text: '#212121',
-    textSecondary: '#757575',
-    border: '#E0E0E0',
-    gridLine: '#BDBDBD'
+  // ==================== EVENT HANDLERS ====================
+  const handleScroll = (e) => {
+    setScrollLeft(e.target.scrollLeft);
   };
 
   const handleSlotClick = (courtIndex, timeIndex) => {
     const slotId = `${courtIndex}-${timeIndex}`;
+
+    // Log slot position
+    console.log('Clicked slot:', {
+      slotId,
+      court: courts[courtIndex],
+      time: timeSlots[timeIndex],
+      courtIndex,
+      timeIndex
+    });
 
     if (bookedSlots.has(slotId)) return;
 
@@ -69,341 +66,246 @@ const BadmintonCourtBooking = () => {
 
   const getSlotColor = (courtIndex, timeIndex) => {
     const slotId = `${courtIndex}-${timeIndex}`;
-
     if (bookedSlots.has(slotId)) return colors.booked;
     if (selectedSlots.has(slotId)) return colors.selected;
-    if (hoveredSlot === slotId) return colors.hover;
-
     return colors.cellBg;
   };
 
-  const getTimeRange = (timeIndex) => {
-    const startTime = timeSlots[timeIndex];
-    const endHour = parseInt(startTime.split(':')[0]) + 1;
-    const endTime = `${endHour.toString().padStart(2, '0')}:00`;
-    return `${startTime}-${endTime}`;
+  const getSlotIcon = (courtIndex, timeIndex) => {
+    const slotId = `${courtIndex}-${timeIndex}`;
+    if (bookedSlots.has(slotId)) return '✕';
+    if (selectedSlots.has(slotId)) return '✓';
+    return '';
   };
 
   return (
-    <div className="w-screen h-screen  flex flex-col overflow-hidden font-sans">
+    <div className="w-screen h-screen flex flex-col overflow-hidden font-sans bg-white">
+      {/* Header */}
       <div className="bg-emerald-700">
         <div className="flex justify-between items-center gap-4 p-3">
-          <TbChevronLeft size={28} className="text-white" onClick={() => navigate(-1, { replace: true })} />
+          <TbChevronLeft
+            size={28}
+            className="text-white cursor-pointer"
+            onClick={() => navigate(-1, { replace: true })}
+          />
           <p className="text-white text-center font-semibold text-base">Đặt lịch</p>
           <div className="w-6"></div>
         </div>
       </div>
-      <div className=" rounded-xl  py-4 flex items-center gap-4 min-w-[300px]">
-        <div className="relative">
-          <div className="absolute top-0 left-0 z-30" style={{ width: leftColumnWidth, height: headerHeight }}>
-            <Stage width={leftColumnWidth} height={headerHeight}>
-              <Layer>
-                <Rect
-                  x={0}
-                  y={0}
-                  width={leftColumnWidth}
-                  height={headerHeight}
-                  fill={colors.surface}
-                />
-              </Layer>
-            </Stage>
-          </div>
-          <div className="absolute top-0 z-20 overflow-hidden" style={{ left: leftColumnWidth, width: 'calc(100vw - 130px)', maxWidth: gridWidth, height: headerHeight }}>
-            <div style={{ transform: `translateX(-${scrollLeft}px)`, width: gridWidth }}>
-              <Stage width={gridWidth} height={headerHeight}>
-                <Layer>
-                  <Rect
-                    x={0}
-                    y={0}
-                    width={gridWidth}
-                    height={headerHeight}
-                    fill={colors.surface}
-                  />
-                  {timeSlots.map((time, index) => (
-                    <Group key={`time-${index}`}>
-                      <Rect
-                        x={index * cellWidth}
-                        y={0}
-                        width={cellWidth}
-                        height={headerHeight}
-                        fill={colors.surface}
-                        stroke={colors.border}
-                        strokeWidth={1}
-                      />
-                    </Group>
-                  ))}
 
-                  {/* First time marker at the start */}
-                  <Rect
-                    x={2}
-                    y={(headerHeight - 24) / 2}
-                    width={45}
-                    height={24}
-                    fill='#FFFFFF'
-                    cornerRadius={4}
-                  />
-                  <Text
-                    x={2}
-                    y={(headerHeight - 24) / 2}
-                    width={45}
-                    height={24}
-                    text={timeSlots[0]}
-                    fontSize={12}
-                    fontFamily='"SF Pro Display", -apple-system, sans-serif'
-                    fontStyle='600'
-                    fill={colors.text}
-                    align='center'
-                    verticalAlign='middle'
-                  />
+      {/* Main Grid Container */}
+      <div className="flex-1 overflow-hidden relative">
+        {/* Fixed Headers Container */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex pointer-events-none" style={{ height: '50px' }}>
+          {/* Top-left corner */}
+          <div
+            className="flex-shrink-0 bg-gray-100 border-b border-r border-gray-300"
+            style={{ width: '70px', height: '50px' }}
+          />
 
-                  {/* Middle time markers on borders */}
-                  {timeSlots.slice(1).map((time, idx) => {
-                    const index = idx + 1;
-                    return (
-                      <Group key={`time-marker-${index}`}>
-                        <Rect
-                          x={index * cellWidth - 22.5}
-                          y={(headerHeight - 24) / 2}
-                          width={45}
-                          height={24}
-                          fill='#FFFFFF'
-                          cornerRadius={4}
-                        />
-                        <Text
-                          x={index * cellWidth - 22.5}
-                          y={(headerHeight - 24) / 2}
-                          width={45}
-                          height={24}
-                          text={time}
-                          fontSize={12}
-                          fontFamily='"SF Pro Display", -apple-system, sans-serif'
-                          fontStyle='600'
-                          fill={colors.text}
-                          align='center'
-                          verticalAlign='middle'
-                        />
-                      </Group>
-                    );
-                  })}
-
-                  {/* End time marker */}
-                  <Rect
-                    x={timeSlots.length * cellWidth - 22.5}
-                    y={(headerHeight - 24) / 2}
-                    width={45}
-                    height={24}
-                    fill='#FFFFFF'
-                    cornerRadius={4}
+          {/* Time header - syncs with scroll */}
+          <div className="flex-1 overflow-hidden relative">
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
+              <div
+                className="flex relative bg-gray-100 border-b border-gray-300"
+                style={{
+                  minWidth: `${timeSlots.length * cellWidth + labelPadding + endPadding}px`,
+                  height: '50px',
+                  transform: `translateX(-${scrollLeft}px)`,
+                  paddingLeft: `${labelPadding}px`,
+                  paddingRight: `${endPadding}px`
+                }}
+              >
+                {/* Time labels positioned on grid lines */}
+                {timeSlots.map((time, index) => (
+                  <div
+                    key={`time-${index}`}
+                    className="absolute flex items-center justify-center"
+                    style={{
+                      left: `${labelPadding + index * cellWidth}px`,
+                      top: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 10
+                    }}
+                  >
+                    <span className="text-xs font-semibold text-gray-700 bg-white px-2 py-1 rounded shadow-sm">
+                      {time}
+                    </span>
+                  </div>
+                ))}
+                {/* Last time label (23:00) */}
+                <div
+                  className="absolute flex items-center justify-center"
+                  style={{
+                    left: `${labelPadding + timeSlots.length * cellWidth}px`,
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 10
+                  }}
+                >
+                  <span className="text-xs font-semibold text-gray-700 bg-white px-2 py-1 rounded shadow-sm">
+                    23:00
+                  </span>
+                </div>
+                {/* Vertical grid lines in header - ALL lines including first */}
+                {[...Array(timeSlots.length + 1)].map((_, index) => (
+                  <div
+                    key={`header-line-${index}`}
+                    className="absolute top-0 bottom-0 border-r border-gray-300"
+                    style={{ left: `${labelPadding + index * cellWidth}px` }}
                   />
-                  <Text
-                    x={timeSlots.length * cellWidth - 22.5}
-                    y={(headerHeight - 24) / 2}
-                    width={45}
-                    height={24}
-                    text='23:00'
-                    fontSize={12}
-                    fontFamily='"SF Pro Display", -apple-system, sans-serif'
-                    fontStyle='600'
-                    fill={colors.text}
-                    align='center'
-                    verticalAlign='middle'
-                  />
-                </Layer>
-              </Stage>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="absolute left-0 z-20 overflow-hidden" style={{ top: headerHeight, width: leftColumnWidth, height: 'calc(100vh - 400px)', maxHeight: gridHeight }}>
-            <div style={{ transform: `translateY(-${scrollTop}px)`, height: gridHeight }}>
-              <Stage width={leftColumnWidth} height={gridHeight}>
-                <Layer>
-                  <Rect
-                    x={0}
-                    y={0}
-                    width={leftColumnWidth}
-                    height={gridHeight}
-                    fill={colors.surface}
-                  />
-                  {courts.map((court, index) => (
-                    <Group key={`court-${index}`}>
-                      <Rect
-                        x={0}
-                        y={index * cellHeight}
-                        width={leftColumnWidth}
-                        height={cellHeight}
-                        fill={colors.surface}
-                        stroke={colors.border}
-                        strokeWidth={1}
-                      />
-                      <Text
-                        x={0}
-                        y={index * cellHeight}
-                        width={leftColumnWidth}
-                        height={cellHeight}
-                        text={court}
-                        fontSize={14}
-                        fontFamily='"SF Pro Display", -apple-system, sans-serif'
-                        fontStyle='600'
-                        fill={colors.text}
-                        align='center'
-                        verticalAlign='middle'
-                      />
-                    </Group>
-                  ))}
-                </Layer>
-              </Stage>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex" style={{ marginTop: '50px', height: 'calc(100vh - 250px)' }}>
+          {/* Court names - fixed left column */}
+          <div className="flex-shrink-0 overflow-hidden" style={{ width: '70px' }}>
+            <div className="flex flex-col">
+              {courts.map((court, index) => (
+                <div
+                  key={`court-${index}`}
+                  className="flex-shrink-0 flex items-center justify-center bg-gray-100 border-b border-r border-gray-300 font-semibold text-sm text-gray-700"
+                  style={{ height: `${cellHeight}px` }}
+                >
+                  {court}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Scrollable Grid Area */}
+          {/* Main scrollable grid */}
           <div
             ref={scrollContainerRef}
-            className="overflow-auto"
+            className="flex-1 overflow-auto"
             style={{
-              marginLeft: leftColumnWidth,
-              marginTop: headerHeight,
-              width: 'calc(100vw - 130px)',
-              maxWidth: gridWidth + 20,
-              height: 'calc(100vh - 400px)',
-              maxHeight: gridHeight + 20
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain'
             }}
             onScroll={handleScroll}
           >
-            <Stage width={gridWidth} height={gridHeight}>
-              <Layer>
-                <Rect
-                  x={0}
-                  y={0}
-                  width={gridWidth}
-                  height={gridHeight}
-                  fill={colors.surface}
-                />
-
-                {/* Grid Lines - Vertical */}
-                {timeSlots.map((_, index) => (
-                  <Line
-                    key={`v-${index}`}
-                    points={[
-                      index * cellWidth,
-                      0,
-                      index * cellWidth,
-                      gridHeight
-                    ]}
-                    stroke={colors.gridLine}
-                    strokeWidth={1}
-                  />
-                ))}
-
-                {/* Grid Lines - Horizontal */}
-                {courts.map((_, index) => (
-                  <Line
-                    key={`h-${index}`}
-                    points={[
-                      0,
-                      index * cellHeight,
-                      gridWidth,
-                      index * cellHeight
-                    ]}
-                    stroke={colors.gridLine}
-                    strokeWidth={1}
-                  />
-                ))}
-
-                {/* Grid Cells */}
-                {courts.map((court, courtIndex) => (
-                  timeSlots.map((time, timeIndex) => {
+            <div style={{ minWidth: `${timeSlots.length * cellWidth + labelPadding + endPadding}px` }}>
+              {courts.map((court, courtIndex) => (
+                <div key={`row-${courtIndex}`} className="flex" style={{ paddingLeft: `${labelPadding}px`, paddingRight: `${endPadding}px` }}>
+                  {timeSlots.map((time, timeIndex) => {
                     const slotId = `${courtIndex}-${timeIndex}`;
                     const isBooked = bookedSlots.has(slotId);
                     const isSelected = selectedSlots.has(slotId);
 
                     return (
-                      <Group key={slotId}>
-                        <Rect
-                          x={timeIndex * cellWidth}
-                          y={courtIndex * cellHeight}
-                          width={cellWidth}
-                          height={cellHeight}
-                          fill={getSlotColor(courtIndex, timeIndex)}
-                          stroke={colors.border}
-                          strokeWidth={1}
-                          onClick={() => handleSlotClick(courtIndex, timeIndex)}
-                          onTap={() => handleSlotClick(courtIndex, timeIndex)}
-                          onMouseEnter={() => !isBooked && setHoveredSlot(slotId)}
-                          onMouseLeave={() => setHoveredSlot(null)}
-                          style={{ cursor: isBooked ? 'not-allowed' : 'pointer' }}
-                        />
-
-                        {/* Status Icon */}
+                      <div
+                        key={slotId}
+                        className={`flex-shrink-0 flex items-center justify-center border-b border-r border-gray-300 transition-colors ${
+                          !isBooked ? 'cursor-pointer active:opacity-70' : 'cursor-not-allowed'
+                        }`}
+                        style={{
+                          width: `${cellWidth}px`,
+                          height: `${cellHeight}px`,
+                          backgroundColor: getSlotColor(courtIndex, timeIndex),
+                          touchAction: 'pan-x pan-y'
+                        }}
+                        onClick={() => handleSlotClick(courtIndex, timeIndex)}
+                      >
                         {(isBooked || isSelected) && (
-                          <Text
-                            x={timeIndex * cellWidth}
-                            y={courtIndex * cellHeight}
-                            width={cellWidth}
-                            height={cellHeight}
-                            text={isBooked ? '✕' : '✓'}
-                            fontSize={20}
-                            fontStyle='bold'
-                            fill={isBooked ? '#D32F2F' : '#1976D2'}
-                            align='center'
-                            verticalAlign='middle'
-                            listening={false}
-                          />
+                          <span
+                            className={`text-xl font-bold ${
+                              isBooked ? 'text-red-600' : 'text-blue-600'
+                            }`}
+                          >
+                            {getSlotIcon(courtIndex, timeIndex)}
+                          </span>
                         )}
-                      </Group>
+                      </div>
                     );
-                  })
-                ))}
-              </Layer>
-            </Stage>
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* <input
-        type="range"
-        min="60"
-        max="150"
-        step="5"
-        value={cellWidth}
-        onChange={(e) => setCellWidth(parseFloat(e.target.value))}
-        className="flex-1 h-1.5 rounded-full outline-none cursor-pointer appearance-none"
-        style={{
-          background: `linear-gradient(to right, #2196F3 0%, #2196F3 ${(cellWidth - 60) / 90 * 100}%, #3A424D ${(cellWidth - 60) / 90 * 100}%, #3A424D 100%)`
-        }}
-      /> */}
-      {/* <div className="p-5 bg-[#1A2028] border-t border-[#3A424D] flex justify-between items-center flex-wrap gap-4 shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
-        <div className="flex gap-6 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-[#9E9E9E] rounded border-2 border-[#3A424D]" />
-            <span className="text-sm text-[#E8EAED]">Trống (Xám)</span>
-          </div>
+      {/* Zoom slider */}
+      <div className="p-4 bg-white border-t border-gray-200">
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-500">Zoom</span>
+          <input
+            type="range"
+            min="60"
+            max="150"
+            step="5"
+            value={cellWidth}
+            onChange={(e) => setCellWidth(parseFloat(e.target.value))}
+            className="flex-1 rounded-full outline-none cursor-pointer appearance-none h-2"
+            style={{
+              background: `linear-gradient(to right, #10b981 0%, #10b981 ${(cellWidth - 60) / 90 * 100}%, #e5e7eb ${(cellWidth - 60) / 90 * 100}%, #e5e7eb 100%)`
+            }}
+          />
+          <span className="text-xs text-gray-500">{cellWidth}px</span>
+        </div>
 
+        {/* Legend */}
+        <div className="flex gap-4 mt-3 justify-center flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-[#2196F3] rounded" />
-            <span className="text-sm text-[#E8EAED]">Đang chọn (Xanh)</span>
+            <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded" />
+            <span className="text-xs text-gray-600">Trống</span>
           </div>
-
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-[#F44336] rounded" />
-            <span className="text-sm text-[#E8EAED]">Khóa (Đỏ)</span>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: colors.selected }} />
+            <span className="text-xs text-gray-600">Đang chọn</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: colors.booked }} />
+            <span className="text-xs text-gray-600">Đã đặt</span>
           </div>
         </div>
 
-        <button
-          onClick={() => {
-            if (selectedSlots.size > 0) {
-              alert(`Đã chọn ${selectedSlots.size} khung giờ`);
-            }
-          }}
-          disabled={selectedSlots.size === 0}
-          className={`px-8 py-3 rounded-xl text-base font-semibold transition-all duration-300 ${selectedSlots.size > 0
-            ? 'bg-gradient-to-r from-[#00D9FF] to-[#FF6B9D] text-white cursor-pointer shadow-[0_4px_16px_rgba(0,217,255,0.3)] hover:scale-105 hover:shadow-[0_6px_20px_rgba(0,217,255,0.4)]'
-            : 'bg-[#3A424D] text-white cursor-not-allowed scale-[0.98]'
-          }`}
-        >
-      Đặt sân ({selectedSlots.size})
-        </button>
-      </div> */}
-    </div >
+        {/* Book button */}
+        {selectedSlots.size > 0 && (
+          <button
+            onClick={() => alert(`Đã chọn ${selectedSlots.size} khung giờ`)}
+            className="w-full mt-3 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg font-semibold shadow-lg active:scale-95 transition-transform"
+          >
+            Đặt sân ({selectedSlots.size})
+          </button>
+        )}
+      </div>
+
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        
+        input[type='range']::-webkit-slider-thumb {
+          appearance: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: #10b981;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        input[type='range']::-moz-range-thumb {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: #10b981;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+      `}</style>
+    </div>
   );
 };
 
