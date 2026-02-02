@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { TbChevronLeft } from 'react-icons/tb';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DatePicker, Slider } from 'antd';
 import dayjs from 'dayjs';
 import 'antd/dist/reset.css';
 import { FORMAT_CURRENCY } from '@/utils/format';
+import { useOrderStore } from '@/state/order';
 
 const BadmintonCourtBooking = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const { order, setOrder, setCourt } = useOrderStore();
 
   const [selectedSlotsByDate, setSelectedSlotsByDate] = useState({});
   const [cellWidth, setCellWidth] = useState(50);
@@ -15,7 +18,6 @@ const BadmintonCourtBooking = () => {
   const scrollContainerRef = useRef(null);
   const timeHeaderRef = useRef(null);
 
-  // Get current date's selections
   const selectedSlots = selectedSlotsByDate[selectedDate.format('YYYY-MM-DD')] || [];
 
   const courts = ['Sân 1', 'Sân 2', 'Sân 3', 'Sân 4', 'Sân 5', 'Sân 6'];
@@ -24,8 +26,12 @@ const BadmintonCourtBooking = () => {
     '12:00', '13:00', '14:00', '15:00', '15:30', '16:00', '16:30', '17:00',
     '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
   ];
+  const courtSample = {
+    name: 'San Badminton Center',
+    address: '123 Đường Thể Thao, Quận 1, TP.HCM',
+    contact: '0123 456 789',
+  };
 
-  // Giá theo khung giờ (VNĐ)
   const priceByTime = {
     '06:00': 80000,
     '07:00': 80000,
@@ -49,6 +55,7 @@ const BadmintonCourtBooking = () => {
     '23:00': 80000,
   };
 
+  // Only hard-coded booked slots - user's order bookings will be in selectedSlotsByDate
   const bookedSlotsByDate = {
     '2026-02-02': ['0-2', '0-5', '1-3', '2-8'],
     '2026-02-03': ['3-10', '4-6', '5-12'],
@@ -98,14 +105,12 @@ const BadmintonCourtBooking = () => {
     const currentDateSlots = selectedSlotsByDate[dateKey] || [];
 
     if (currentDateSlots.includes(slotId)) {
-      // Remove slot
       const updatedSlots = currentDateSlots.filter(id => id !== slotId);
       setSelectedSlotsByDate({
         ...selectedSlotsByDate,
         [dateKey]: updatedSlots
       });
     } else {
-      // Add slot
       setSelectedSlotsByDate({
         ...selectedSlotsByDate,
         [dateKey]: [...currentDateSlots, slotId]
@@ -233,7 +238,6 @@ const BadmintonCourtBooking = () => {
   };
 
   const handleSubmitBooking = () => {
-    // Group bookings by date with detailed info
     const bookingsByDate = {};
 
     Object.entries(selectedSlotsByDate).forEach(([date, slots]) => {
@@ -255,23 +259,25 @@ const BadmintonCourtBooking = () => {
         });
       }
     });
-
-    console.log('=== BOOKING SUMMARY ===');
-    console.log('Total dates:', Object.keys(bookingsByDate).length);
-    console.log('Total slots:', getTotalSlotCount());
-    console.log('Total price:', FORMAT_CURRENCY(calculateTotalPrice()));
-    console.log('\n=== BOOKINGS BY DATE ===');
-
-    Object.entries(bookingsByDate).forEach(([date, bookings]) => {
-      console.log(`\n📅 ${dayjs(date).format('DD/MM/YYYY')} (${bookings.length} slots)`);
-      bookings.forEach(booking => {
-        console.log(`  - ${booking.court} @ ${booking.time} - ${FORMAT_CURRENCY(booking.price)}`);
-      });
+    setOrder({
+      ...order,
+      bookingsByDate,
+      totalSlots: getTotalSlotCount(),
+      totalPrice: calculateTotalPrice()
     });
-
-    console.log('\n=== RAW DATA ===');
-    console.log(JSON.stringify(bookingsByDate, null, 2));
+    setCourt(courtSample);
+    navigate(`/booking/confirm/${id}`, { replace: true });
   };
+
+  useEffect(() => {
+    if (order?.bookingsByDate) {
+      const initialSelectedSlots = {};
+      Object.entries(order.bookingsByDate).forEach(([date, bookings]) => {
+        initialSelectedSlots[date] = bookings.map(b => b.slotId);
+      });
+      setSelectedSlotsByDate(initialSelectedSlots);
+    }
+  }, []);
 
   useEffect(() => {
     const today = dayjs().format('YYYY-MM-DD');
@@ -309,7 +315,7 @@ const BadmintonCourtBooking = () => {
           <TbChevronLeft
             size={28}
             className="text-white cursor-pointer"
-            onClick={() => navigate(-1, { replace: true })}
+            onClick={() => navigate('/', { replace: true })}
           />
           <p className="text-white text-center font-semibold text-base">Đặt lịch</p>
           <div className="w-6"></div>
@@ -363,8 +369,7 @@ const BadmintonCourtBooking = () => {
                 {timeSlots.map((time, index) => (
                   <div
                     key={`time-${index}`}
-                    className={`flex-shrink-0 flex flex-col items-center justify-center border-r border-gray-200 ${
-                      isSlotInPast(time) ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-teal-200 active:bg-teal-300'
+                    className={`flex-shrink-0 flex flex-col items-center justify-center border-r border-gray-200 ${isSlotInPast(time) ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-teal-200 active:bg-teal-300'
                     } transition-colors`}
                     style={{
                       width: `${cellWidth}px`,
@@ -415,8 +420,7 @@ const BadmintonCourtBooking = () => {
                     return (
                       <div
                         key={slotId}
-                        className={`flex-shrink-0 flex items-center justify-center border-b border-r border-gray-300 transition-colors ${
-                          isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer active:opacity-70'
+                        className={`flex-shrink-0 flex items-center justify-center border-b border-r border-gray-300 transition-colors ${isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer active:opacity-70'
                         }`}
                         style={{
                           width: `${cellWidth}px`,

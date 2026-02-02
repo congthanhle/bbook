@@ -3,6 +3,7 @@ import Map from '@/pages/map';
 import Ticket from '@/pages/ticket';
 import User from '@/pages/user';
 import Booking from '@/pages/booking';
+import BookingConfirm from '@/pages/booking/confirm';
 import { TbSmartHome, TbMap2, TbUser, TbTicket } from 'react-icons/tb';
 
 const routes = [
@@ -38,6 +39,18 @@ const routes = [
     path: '/booking/:id',
     key: 'booking',
     component: <Booking />,
+    isRootRouter: false,
+  },
+  {
+    path: '/booking/confirm/:id',
+    key: 'booking_confirm',
+    component: <BookingConfirm />,
+    isRootRouter: false,
+  },
+  {
+    path: '/booking/checkout',
+    key: 'booking_checkout',
+    component: <BookingConfirm />,
     isRootRouter: false,
   }
 ];
