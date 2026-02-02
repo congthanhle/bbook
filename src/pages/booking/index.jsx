@@ -9,11 +9,14 @@ import { FORMAT_CURRENCY } from '@/utils/format';
 const BadmintonCourtBooking = () => {
   const navigate = useNavigate();
 
-  const [selectedSlots, setSelectedSlots] = useState([]);
+  const [selectedSlotsByDate, setSelectedSlotsByDate] = useState({});
   const [cellWidth, setCellWidth] = useState(50);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const scrollContainerRef = useRef(null);
   const timeHeaderRef = useRef(null);
+
+  // Get current date's selections
+  const selectedSlots = selectedSlotsByDate[selectedDate.format('YYYY-MM-DD')] || [];
 
   const courts = ['Sân 1', 'Sân 2', 'Sân 3', 'Sân 4', 'Sân 5', 'Sân 6'];
   const timeSlots = [
@@ -64,12 +67,18 @@ const BadmintonCourtBooking = () => {
 
   const calculateTotalPrice = () => {
     let total = 0;
-    selectedSlots.forEach(slotId => {
-      const [, timeIndex] = slotId.split('-').map(Number);
-      const timeSlot = timeSlots[timeIndex];
-      total += priceByTime[timeSlot] || 0;
+    Object.values(selectedSlotsByDate).forEach(slots => {
+      slots.forEach(slotId => {
+        const [, timeIndex] = slotId.split('-').map(Number);
+        const timeSlot = timeSlots[timeIndex];
+        total += priceByTime[timeSlot] || 0;
+      });
     });
     return total;
+  };
+
+  const getTotalSlotCount = () => {
+    return Object.values(selectedSlotsByDate).reduce((sum, slots) => sum + slots.length, 0);
   };
 
   const handleScroll = (e) => {
@@ -81,14 +90,99 @@ const BadmintonCourtBooking = () => {
   const handleSlotClick = (courtIndex, timeIndex) => {
     const slotId = `${courtIndex}-${timeIndex}`;
     const timeSlot = timeSlots[timeIndex];
-    const currentBookedSlots = bookedSlotsByDate[selectedDate.format('YYYY-MM-DD')] || [];
+    const dateKey = selectedDate.format('YYYY-MM-DD');
+    const currentBookedSlots = bookedSlotsByDate[dateKey] || [];
 
     if (isSlotInPast(timeSlot) || currentBookedSlots.includes(slotId)) return;
 
-    if (selectedSlots.includes(slotId)) {
-      setSelectedSlots(selectedSlots.filter(id => id !== slotId));
+    const currentDateSlots = selectedSlotsByDate[dateKey] || [];
+
+    if (currentDateSlots.includes(slotId)) {
+      // Remove slot
+      const updatedSlots = currentDateSlots.filter(id => id !== slotId);
+      setSelectedSlotsByDate({
+        ...selectedSlotsByDate,
+        [dateKey]: updatedSlots
+      });
     } else {
-      setSelectedSlots([...selectedSlots, slotId]);
+      // Add slot
+      setSelectedSlotsByDate({
+        ...selectedSlotsByDate,
+        [dateKey]: [...currentDateSlots, slotId]
+      });
+    }
+  };
+
+  const handleTimeSlotClick = (timeIndex) => {
+    const timeSlot = timeSlots[timeIndex];
+    const dateKey = selectedDate.format('YYYY-MM-DD');
+    const currentBookedSlots = bookedSlotsByDate[dateKey] || [];
+    const currentDateSlots = selectedSlotsByDate[dateKey] || [];
+
+    if (isSlotInPast(timeSlot)) return;
+
+    const availableSlots = [];
+    courts.forEach((_, courtIndex) => {
+      const slotId = `${courtIndex}-${timeIndex}`;
+      if (!currentBookedSlots.includes(slotId)) {
+        availableSlots.push(slotId);
+      }
+    });
+
+    const allSelected = availableSlots.every(slotId => currentDateSlots.includes(slotId));
+
+    if (allSelected) {
+      const updatedSlots = currentDateSlots.filter(slotId => !availableSlots.includes(slotId));
+      setSelectedSlotsByDate({
+        ...selectedSlotsByDate,
+        [dateKey]: updatedSlots
+      });
+    } else {
+      const newSlots = [...currentDateSlots];
+      availableSlots.forEach(slotId => {
+        if (!newSlots.includes(slotId)) {
+          newSlots.push(slotId);
+        }
+      });
+      setSelectedSlotsByDate({
+        ...selectedSlotsByDate,
+        [dateKey]: newSlots
+      });
+    }
+  };
+
+  const handleCourtClick = (courtIndex) => {
+    const dateKey = selectedDate.format('YYYY-MM-DD');
+    const currentBookedSlots = bookedSlotsByDate[dateKey] || [];
+    const currentDateSlots = selectedSlotsByDate[dateKey] || [];
+
+    const availableSlots = [];
+    timeSlots.forEach((timeSlot, timeIndex) => {
+      const slotId = `${courtIndex}-${timeIndex}`;
+      if (!currentBookedSlots.includes(slotId) && !isSlotInPast(timeSlot)) {
+        availableSlots.push(slotId);
+      }
+    });
+
+    const allSelected = availableSlots.every(slotId => currentDateSlots.includes(slotId));
+
+    if (allSelected) {
+      const updatedSlots = currentDateSlots.filter(slotId => !availableSlots.includes(slotId));
+      setSelectedSlotsByDate({
+        ...selectedSlotsByDate,
+        [dateKey]: updatedSlots
+      });
+    } else {
+      const newSlots = [...currentDateSlots];
+      availableSlots.forEach(slotId => {
+        if (!newSlots.includes(slotId)) {
+          newSlots.push(slotId);
+        }
+      });
+      setSelectedSlotsByDate({
+        ...selectedSlotsByDate,
+        [dateKey]: newSlots
+      });
     }
   };
 
@@ -139,7 +233,44 @@ const BadmintonCourtBooking = () => {
   };
 
   const handleSubmitBooking = () => {
-    console.log('Đã chọn', selectedSlots);
+    // Group bookings by date with detailed info
+    const bookingsByDate = {};
+
+    Object.entries(selectedSlotsByDate).forEach(([date, slots]) => {
+      if (slots.length > 0) {
+        bookingsByDate[date] = slots.map(slotId => {
+          const [courtIndex, timeIndex] = slotId.split('-').map(Number);
+          const court = courts[courtIndex];
+          const timeSlot = timeSlots[timeIndex];
+          const price = priceByTime[timeSlot];
+
+          return {
+            slotId,
+            court,
+            courtIndex,
+            time: timeSlot,
+            timeIndex,
+            price
+          };
+        });
+      }
+    });
+
+    console.log('=== BOOKING SUMMARY ===');
+    console.log('Total dates:', Object.keys(bookingsByDate).length);
+    console.log('Total slots:', getTotalSlotCount());
+    console.log('Total price:', FORMAT_CURRENCY(calculateTotalPrice()));
+    console.log('\n=== BOOKINGS BY DATE ===');
+
+    Object.entries(bookingsByDate).forEach(([date, bookings]) => {
+      console.log(`\n📅 ${dayjs(date).format('DD/MM/YYYY')} (${bookings.length} slots)`);
+      bookings.forEach(booking => {
+        console.log(`  - ${booking.court} @ ${booking.time} - ${FORMAT_CURRENCY(booking.price)}`);
+      });
+    });
+
+    console.log('\n=== RAW DATA ===');
+    console.log(JSON.stringify(bookingsByDate, null, 2));
   };
 
   useEffect(() => {
@@ -206,7 +337,6 @@ const BadmintonCourtBooking = () => {
             value={selectedDate}
             onChange={(date) => {
               setSelectedDate(date || dayjs());
-              setSelectedSlots([]);
             }}
             disabledDate={(current) => current && current < dayjs().startOf('day')}
             format="DD/MM/YYYY"
@@ -217,8 +347,8 @@ const BadmintonCourtBooking = () => {
         </div>
       </div>
       <div className="flex-1 overflow-hidden relative text-secondary">
-        <div className="absolute top-0 left-0 right-0 z-10 flex pointer-events-none h-[50px]">
-          <div className="flex-shrink-0 bg-teal-100 border-b border-r border-gray-300 w-[70px] h-[50px]" />
+        <div className="absolute top-0 left-0 right-0 z-10 flex h-[50px]">
+          <div className="flex-shrink-0 bg-teal-100 border-b border-r border-gray-300 w-[70px] h-[50px] pointer-events-none" />
           <div className="flex-1 overflow-hidden relative">
             <div
               ref={timeHeaderRef}
@@ -233,11 +363,14 @@ const BadmintonCourtBooking = () => {
                 {timeSlots.map((time, index) => (
                   <div
                     key={`time-${index}`}
-                    className="flex-shrink-0 flex flex-col items-center justify-center border-r border-gray-200"
+                    className={`flex-shrink-0 flex flex-col items-center justify-center border-r border-gray-200 ${
+                      isSlotInPast(time) ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-teal-200 active:bg-teal-300'
+                    } transition-colors`}
                     style={{
                       width: `${cellWidth}px`,
                       boxSizing: 'border-box'
                     }}
+                    onClick={() => handleTimeSlotClick(index)}
                   >
                     <div className="font-semibold text-sm">{time}</div>
                     <div className="text-xs text-emerald-600 font-medium">
@@ -255,8 +388,9 @@ const BadmintonCourtBooking = () => {
               {courts.map((court, index) => (
                 <div
                   key={`court-${index}`}
-                  className="flex-shrink-0 flex items-center justify-center bg-teal-100 border-b border-r border-gray-300 font-semibold text-sm text-secondary"
+                  className="flex-shrink-0 flex items-center justify-center bg-teal-100 border-b border-r border-gray-300 font-semibold text-sm text-secondary cursor-pointer hover:bg-teal-200 active:bg-teal-300 transition-colors"
                   style={{ height: `${cellHeight}px` }}
+                  onClick={() => handleCourtClick(index)}
                 >
                   {court}
                 </div>
@@ -313,7 +447,7 @@ const BadmintonCourtBooking = () => {
             className="flex-1"
           />
         </div>
-        {selectedSlots.length > 0 && (
+        {getTotalSlotCount() > 0 && (
           <div className="mt-2 space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm">Tổng tiền:</span>
@@ -325,7 +459,7 @@ const BadmintonCourtBooking = () => {
               onClick={() => handleSubmitBooking()}
               className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-800 text-white rounded-lg font-semibold shadow-lg active:scale-95 transition-transform"
             >
-              Đặt sân
+              Đặt sân ({getTotalSlotCount()} khung giờ - {Object.keys(selectedSlotsByDate).filter(date => selectedSlotsByDate[date]?.length > 0).length} ngày)
             </button>
           </div>
         )}
