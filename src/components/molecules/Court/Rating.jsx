@@ -12,7 +12,7 @@ const Rating = ({ item }) => {
   };
 
   return (
-    <div className="space-y-5 p-2">
+    <div className="space-y-5 p-2 max-h-[calc(100vh-410px)] overflow-y-auto">
       {item.map((rate) => (
         <div key={rate.id} className="flex gap-3">
           <img src={rate.avatar} className="w-12 h-12 rounded-2xl"/>

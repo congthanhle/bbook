@@ -1,86 +1,178 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { TbChevronLeft } from 'react-icons/tb';
 import { useNavigate } from 'react-router-dom';
+import { DatePicker, Slider } from 'antd';
+import dayjs from 'dayjs';
+import 'antd/dist/reset.css';
+import { FORMAT_CURRENCY } from '@/utils/format';
 
 const BadmintonCourtBooking = () => {
   const navigate = useNavigate();
 
-  // ==================== STATE MANAGEMENT ====================
-  const [selectedSlots, setSelectedSlots] = useState(new Set());
+  const [selectedSlots, setSelectedSlots] = useState([]);
   const [cellWidth, setCellWidth] = useState(50);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
   const scrollContainerRef = useRef(null);
+  const timeHeaderRef = useRef(null);
 
-  // ==================== DATA CONFIGURATION ====================
   const courts = ['Sân 1', 'Sân 2', 'Sân 3', 'Sân 4', 'Sân 5', 'Sân 6'];
   const timeSlots = [
     '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
-    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
-    '18:00', '19:00', '20:00', '21:00', '22:00'
+    '12:00', '13:00', '14:00', '15:00', '15:30', '16:00', '16:30', '17:00',
+    '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
   ];
-  const bookedSlots = new Set([
-    '0-2', '0-5', '1-3', '2-8', '3-10', '4-6', '5-12'
-  ]);
 
-  // ==================== LAYOUT DIMENSIONS ====================
+  // Giá theo khung giờ (VNĐ)
+  const priceByTime = {
+    '06:00': 80000,
+    '07:00': 80000,
+    '08:00': 100000,
+    '09:00': 100000,
+    '10:00': 100000,
+    '11:00': 100000,
+    '12:00': 80000,
+    '13:00': 80000,
+    '14:00': 80000,
+    '15:00': 120000,
+    '15:30': 120000,
+    '16:00': 120000,
+    '16:30': 120000,
+    '17:00': 150000,
+    '18:00': 150000,
+    '19:00': 150000,
+    '20:00': 150000,
+    '21:00': 120000,
+    '22:00': 100000,
+    '23:00': 80000,
+  };
+
+  const bookedSlotsByDate = {
+    '2026-02-02': ['0-2', '0-5', '1-3', '2-8'],
+    '2026-02-03': ['3-10', '4-6', '5-12'],
+    '2026-02-04': ['1-5', '2-10'],
+  };
+
   const cellHeight = 60;
-  const labelPadding = 30; // Padding for first time label
-  const endPadding = 64; // Padding after last label to make 23:00 visible
 
-  // ==================== COLOR SCHEME ====================
   const colors = {
     cellBg: '#FFFFFF',
-    booked: '#FFEBEE',
+    booked: '#f87171',
     selected: '#BBDEFB',
     border: '#E0E0E0',
     surface: '#F8F9FA',
   };
 
-  // ==================== EVENT HANDLERS ====================
+  const calculateTotalPrice = () => {
+    let total = 0;
+    selectedSlots.forEach(slotId => {
+      const [, timeIndex] = slotId.split('-').map(Number);
+      const timeSlot = timeSlots[timeIndex];
+      total += priceByTime[timeSlot] || 0;
+    });
+    return total;
+  };
+
   const handleScroll = (e) => {
-    setScrollLeft(e.target.scrollLeft);
+    if (timeHeaderRef.current) {
+      timeHeaderRef.current.scrollLeft = e.target.scrollLeft;
+    }
   };
 
   const handleSlotClick = (courtIndex, timeIndex) => {
     const slotId = `${courtIndex}-${timeIndex}`;
+    const timeSlot = timeSlots[timeIndex];
+    const currentBookedSlots = bookedSlotsByDate[selectedDate.format('YYYY-MM-DD')] || [];
 
-    // Log slot position
-    console.log('Clicked slot:', {
-      slotId,
-      court: courts[courtIndex],
-      time: timeSlots[timeIndex],
-      courtIndex,
-      timeIndex
-    });
+    if (isSlotInPast(timeSlot) || currentBookedSlots.includes(slotId)) return;
 
-    if (bookedSlots.has(slotId)) return;
-
-    const newSelected = new Set(selectedSlots);
-    if (newSelected.has(slotId)) {
-      newSelected.delete(slotId);
+    if (selectedSlots.includes(slotId)) {
+      setSelectedSlots(selectedSlots.filter(id => id !== slotId));
     } else {
-      newSelected.add(slotId);
+      setSelectedSlots([...selectedSlots, slotId]);
     }
-    setSelectedSlots(newSelected);
+  };
+
+  const isSlotInPast = (timeSlot) => {
+    const now = dayjs();
+    const today = now.format('YYYY-MM-DD');
+    const selectedDateStr = selectedDate.format('YYYY-MM-DD');
+
+    if (selectedDateStr < today) return true;
+
+    if (selectedDateStr > today) return false;
+
+    const [hours] = timeSlot.split(':').map(Number);
+    const currentHour = now.hour();
+    return hours <= currentHour;
   };
 
   const getSlotColor = (courtIndex, timeIndex) => {
     const slotId = `${courtIndex}-${timeIndex}`;
-    if (bookedSlots.has(slotId)) return colors.booked;
-    if (selectedSlots.has(slotId)) return colors.selected;
+    const timeSlot = timeSlots[timeIndex];
+    const currentBookedSlots = bookedSlotsByDate[selectedDate.format('YYYY-MM-DD')] || [];
+
+    if (isSlotInPast(timeSlot)) return '#9ca3af';
+    if (currentBookedSlots.includes(slotId)) return colors.booked;
+    if (selectedSlots.includes(slotId)) return colors.selected;
     return colors.cellBg;
   };
 
-  const getSlotIcon = (courtIndex, timeIndex) => {
-    const slotId = `${courtIndex}-${timeIndex}`;
-    if (bookedSlots.has(slotId)) return '✕';
-    if (selectedSlots.has(slotId)) return '✓';
-    return '';
+  const scrollToCurrentTime = () => {
+    const now = dayjs();
+    const currentHour = now.hour();
+    let targetIndex = timeSlots.findIndex(slot => {
+      const [hours] = slot.split(':').map(Number);
+      return hours >= currentHour;
+    });
+    if (targetIndex === -1) {
+      targetIndex = timeSlots.length - 1;
+    }
+
+    const scrollPosition = Math.max(0, (targetIndex - 1) * cellWidth);
+
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      });
+    }
   };
+
+  const handleSubmitBooking = () => {
+    console.log('Đã chọn', selectedSlots);
+  };
+
+  useEffect(() => {
+    const today = dayjs().format('YYYY-MM-DD');
+    const selectedDateStr = selectedDate.format('YYYY-MM-DD');
+
+    if (selectedDateStr === today) {
+      setTimeout(() => {
+        scrollToCurrentTime();
+      }, 100);
+    }
+  }, []);
+
+  useEffect(() => {
+    const today = dayjs().format('YYYY-MM-DD');
+    const selectedDateStr = selectedDate.format('YYYY-MM-DD');
+
+    if (selectedDateStr === today) {
+      setTimeout(() => {
+        scrollToCurrentTime();
+      }, 100);
+      return;
+    }
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        left: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [selectedDate]);
 
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden font-sans bg-white">
-      {/* Header */}
       <div className="bg-emerald-700 pb-4">
         <div className="flex justify-between items-center gap-4 p-3">
           <TbChevronLeft
@@ -91,97 +183,79 @@ const BadmintonCourtBooking = () => {
           <p className="text-white text-center font-semibold text-base">Đặt lịch</p>
           <div className="w-6"></div>
         </div>
-        <div className="flex gap-4 mt-3 justify-center flex-wrap text-white">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded" />
-            <span className="text-sm">Trống</span>
+        <div className="flex gap-3 justify-center flex-wrap text-white text-xs">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3.5 h-3.5 bg-white border-gray-300 rounded" />
+            <span>Trống</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: colors.selected }} />
-            <span className="text-sm">Đang chọn</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3.5 h-3.5 rounded" style={{ backgroundColor: colors.selected }} />
+            <span>Đang chọn</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: colors.booked }} />
-            <span className="text-sm">Đã đặt</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3.5 h-3.5 rounded" style={{ backgroundColor: colors.booked }} />
+            <span>Đã đặt</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3.5 h-3.5 bg-gray-400 rounded" />
+            <span>Đã qua</span>
           </div>
         </div>
-      </div>
-      <div className="flex-1 overflow-hidden relative">
-        <div className="absolute top-0 left-0 right-0 z-10 flex pointer-events-none" style={{ height: '50px' }}>
-          <div
-            className="flex-shrink-0 bg-gray-100 border-b border-r border-gray-300"
-            style={{ width: '70px', height: '50px' }}
+        <div className="px-3 mt-4 w-1/2 ml-auto">
+          <DatePicker
+            value={selectedDate}
+            onChange={(date) => {
+              setSelectedDate(date || dayjs());
+              setSelectedSlots([]);
+            }}
+            disabledDate={(current) => current && current < dayjs().startOf('day')}
+            format="DD/MM/YYYY"
+            placeholder="Chọn ngày"
+            className="w-full border-none"
+            allowClear={false}
           />
+        </div>
+      </div>
+      <div className="flex-1 overflow-hidden relative text-secondary">
+        <div className="absolute top-0 left-0 right-0 z-10 flex pointer-events-none h-[50px]">
+          <div className="flex-shrink-0 bg-teal-100 border-b border-r border-gray-300 w-[70px] h-[50px]" />
           <div className="flex-1 overflow-hidden relative">
             <div
-              className="absolute inset-0 overflow-hidden"
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none'
-              }}
+              ref={timeHeaderRef}
+              className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
             >
               <div
-                className="flex relative bg-gray-100 border-b border-gray-300"
+                className="flex bg-teal-100 border-b border-gray-300 h-[50px]"
                 style={{
-                  minWidth: `${timeSlots.length * cellWidth + labelPadding + endPadding}px`,
-                  height: '50px',
-                  transform: `translateX(-${scrollLeft}px)`,
-                  paddingLeft: `${labelPadding}px`,
-                  paddingRight: `${endPadding}px`
+                  minWidth: `${timeSlots.length * cellWidth}px`
                 }}
               >
-                {/* Time labels positioned on grid lines */}
                 {timeSlots.map((time, index) => (
                   <div
                     key={`time-${index}`}
-                    className="absolute flex items-center justify-center"
+                    className="flex-shrink-0 flex flex-col items-center justify-center border-r border-gray-200"
                     style={{
-                      left: `${labelPadding + index * cellWidth}px`,
-                      top: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      zIndex: 10
+                      width: `${cellWidth}px`,
+                      boxSizing: 'border-box'
                     }}
                   >
-                    <span className="text-sm font-semibold text-gray-700 px-2 py-1 rounded shadow-sm">
-                      {time}
-                    </span>
+                    <div className="font-semibold text-sm">{time}</div>
+                    <div className="text-xs text-emerald-600 font-medium">
+                      {(priceByTime[time] / 1000).toFixed(0)}k
+                    </div>
                   </div>
-                ))}
-                <div
-                  className="absolute flex items-center justify-center"
-                  style={{
-                    left: `${labelPadding + timeSlots.length * cellWidth}px`,
-                    top: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 10
-                  }}
-                >
-                  <span className="text-xs font-semibold text-gray-700 px-2 py-1 rounded shadow-sm">
-                    23:00
-                  </span>
-                </div>
-
-                {[...Array(timeSlots.length + 1)].map((_, index) => (
-                  <div
-                    key={`header-line-${index}`}
-                    className="absolute top-0 bottom-0 border-r border-gray-300"
-                    style={{ left: `${labelPadding + index * cellWidth}px` }}
-                  />
                 ))}
               </div>
             </div>
           </div>
         </div>
-
-        {/* Scrollable Content */}
-        <div className="flex" style={{ marginTop: '50px', height: 'calc(100vh - 250px)' }}>
-          {/* Court names - fixed left column */}
-          <div className="flex-shrink-0 overflow-hidden" style={{ width: '70px' }}>
+        <div className="flex mt-[50px] h-[calc(100vh-250px)]">
+          <div className="flex-shrink-0 overflow-hidden w-[70px]">
             <div className="flex flex-col">
               {courts.map((court, index) => (
                 <div
                   key={`court-${index}`}
-                  className="flex-shrink-0 flex items-center justify-center bg-teal-100 border-b border-r border-gray-300 font-semibold text-sm text-gray-700"
+                  className="flex-shrink-0 flex items-center justify-center bg-teal-100 border-b border-r border-gray-300 font-semibold text-sm text-secondary"
                   style={{ height: `${cellHeight}px` }}
                 >
                   {court}
@@ -189,47 +263,36 @@ const BadmintonCourtBooking = () => {
               ))}
             </div>
           </div>
-
-          {/* Main scrollable grid */}
           <div
             ref={scrollContainerRef}
-            className="flex-1 overflow-auto"
-            style={{
-              WebkitOverflowScrolling: 'touch',
-              overscrollBehavior: 'contain'
-            }}
+            className="flex-1 overflow-auto [-webkit-overflow-scrolling:touch] overscroll-contain"
             onScroll={handleScroll}
           >
-            <div style={{ minWidth: `${timeSlots.length * cellWidth + labelPadding + endPadding}px` }}>
+            <div style={{ minWidth: `${timeSlots.length * cellWidth}px` }}>
               {courts.map((court, courtIndex) => (
-                <div key={`row-${courtIndex}`} className="flex" style={{ paddingLeft: `${labelPadding}px`, paddingRight: `${endPadding}px` }}>
+                <div key={`row-${courtIndex}`} className="flex">
                   {timeSlots.map((time, timeIndex) => {
                     const slotId = `${courtIndex}-${timeIndex}`;
-                    const isBooked = bookedSlots.has(slotId);
-                    const isSelected = selectedSlots.has(slotId);
+                    const currentBookedSlots = bookedSlotsByDate[selectedDate.format('YYYY-MM-DD')] || [];
+                    const isBooked = currentBookedSlots.includes(slotId);
+                    const isPast = isSlotInPast(time);
+                    const isDisabled = isPast || isBooked;
 
                     return (
                       <div
                         key={slotId}
-                        className={`flex-shrink-0 flex items-center justify-center border-b border-r border-gray-300 transition-colors ${timeIndex === 0 ? 'border-l' : ''} ${!isBooked ? 'cursor-pointer active:opacity-70' : 'cursor-not-allowed'
+                        className={`flex-shrink-0 flex items-center justify-center border-b border-r border-gray-300 transition-colors ${
+                          isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer active:opacity-70'
                         }`}
                         style={{
                           width: `${cellWidth}px`,
                           height: `${cellHeight}px`,
                           backgroundColor: getSlotColor(courtIndex, timeIndex),
-                          touchAction: 'pan-x pan-y'
+                          touchAction: 'pan-x pan-y',
+                          boxSizing: 'border-box'
                         }}
                         onClick={() => handleSlotClick(courtIndex, timeIndex)}
-                      >
-                        {(isBooked || isSelected) && (
-                          <span
-                            className={`text-xl font-bold ${isBooked ? 'text-red-600' : 'text-blue-600'
-                            }`}
-                          >
-                            {getSlotIcon(courtIndex, timeIndex)}
-                          </span>
-                        )}
-                      </div>
+                      />
                     );
                   })}
                 </div>
@@ -238,33 +301,33 @@ const BadmintonCourtBooking = () => {
           </div>
         </div>
       </div>
-
-      {/* Zoom slider */}
-      <div className="p-4 bg-white border-t border-gray-200">
+      <div className="p-4 bg-white border-t border-gray-200 text-secondary">
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500">Zoom</span>
-          <input
-            type="range"
-            min="50"
-            max="150"
-            step="5"
+          <span className="text-xs whitespace-nowrap">Zoom</span>
+          <Slider
+            min={50}
+            max={150}
+            step={5}
             value={cellWidth}
-            onChange={(e) => setCellWidth(parseFloat(e.target.value))}
-            className="flex-1 rounded-full outline-none cursor-pointer appearance-none h-2"
-            style={{
-              background: `linear-gradient(to right, #10b981 0%, #10b981 ${(cellWidth - 60) / 90 * 100}%, #e5e7eb ${(cellWidth - 60) / 90 * 100}%, #e5e7eb 100%)`
-            }}
+            onChange={setCellWidth}
+            className="flex-1"
           />
-          <span className="text-xs text-gray-500">{cellWidth}px</span>
         </div>
-        {/* Book button */}
-        {selectedSlots.size > 0 && (
-          <button
-            onClick={() => alert(`Đã chọn ${selectedSlots.size} khung giờ`)}
-            className="w-full mt-3 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg font-semibold shadow-lg active:scale-95 transition-transform"
-          >
-            Đặt sân ({selectedSlots.size})
-          </button>
+        {selectedSlots.length > 0 && (
+          <div className="mt-2 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Tổng tiền:</span>
+              <span className="font-bold text-emerald-700 text-lg">
+                {FORMAT_CURRENCY(calculateTotalPrice())}
+              </span>
+            </div>
+            <button
+              onClick={() => handleSubmitBooking()}
+              className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-800 text-white rounded-lg font-semibold shadow-lg active:scale-95 transition-transform"
+            >
+              Đặt sân
+            </button>
+          </div>
         )}
       </div>
     </div>
