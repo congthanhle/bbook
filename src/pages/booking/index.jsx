@@ -55,7 +55,6 @@ const BadmintonCourtBooking = () => {
     '23:00': 80000,
   };
 
-  // Only hard-coded booked slots - user's order bookings will be in selectedSlotsByDate
   const bookedSlotsByDate = {
     '2026-02-02': ['0-2', '0-5', '1-3', '2-8'],
     '2026-02-03': ['3-10', '4-6', '5-12'],
@@ -242,7 +241,8 @@ const BadmintonCourtBooking = () => {
 
     Object.entries(selectedSlotsByDate).forEach(([date, slots]) => {
       if (slots.length > 0) {
-        bookingsByDate[date] = slots.map(slotId => {
+
+        const allBookings = slots.map(slotId => {
           const [courtIndex, timeIndex] = slotId.split('-').map(Number);
           const court = courts[courtIndex];
           const timeSlot = timeSlots[timeIndex];
@@ -252,13 +252,58 @@ const BadmintonCourtBooking = () => {
             slotId,
             court,
             courtIndex,
-            time: timeSlot,
             timeIndex,
+            timeSlot,
             price
           };
         });
+        const groupedByCourt = {};
+        allBookings.forEach(booking => {
+          if (!groupedByCourt[booking.court]) {
+            groupedByCourt[booking.court] = [];
+          }
+          groupedByCourt[booking.court].push(booking);
+        });
+
+        const mergedBookings = [];
+        Object.values(groupedByCourt).forEach(courtBookings => {
+          courtBookings.sort((a, b) => a.timeIndex - b.timeIndex);
+
+          let i = 0;
+          while (i < courtBookings.length) {
+            const current = courtBookings[i];
+            let endTimeIndex = current.timeIndex;
+            let totalPrice = current.price;
+            const slotIds = [current.slotId];
+
+            let j = i + 1;
+            while (j < courtBookings.length && courtBookings[j].timeIndex === endTimeIndex + 1) {
+              endTimeIndex = courtBookings[j].timeIndex;
+              totalPrice += courtBookings[j].price;
+              slotIds.push(courtBookings[j].slotId);
+              j++;
+            }
+            const startTime = timeSlots[current.timeIndex];
+            const endTime = timeSlots[endTimeIndex + 1] || '24:00';
+            const timeRange = `${startTime} - ${endTime}`;
+
+            mergedBookings.push({
+              slotId: slotIds.join(','),
+              court: current.court,
+              courtIndex: current.courtIndex,
+              time: timeRange,
+              timeIndex: current.timeIndex,
+              price: totalPrice
+            });
+
+            i = j;
+          }
+        });
+
+        bookingsByDate[date] = mergedBookings;
       }
     });
+
     setOrder({
       ...order,
       bookingsByDate,
@@ -273,7 +318,15 @@ const BadmintonCourtBooking = () => {
     if (order?.bookingsByDate) {
       const initialSelectedSlots = {};
       Object.entries(order.bookingsByDate).forEach(([date, bookings]) => {
-        initialSelectedSlots[date] = bookings.map(b => b.slotId);
+        const slotIds = [];
+        bookings.forEach(b => {
+          if (b.slotId.includes(',')) {
+            slotIds.push(...b.slotId.split(','));
+          } else {
+            slotIds.push(b.slotId);
+          }
+        });
+        initialSelectedSlots[date] = slotIds;
       });
       setSelectedSlotsByDate(initialSelectedSlots);
     }
@@ -311,13 +364,13 @@ const BadmintonCourtBooking = () => {
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden font-sans bg-white">
       <div className="bg-emerald-700 pb-4">
-        <div className="flex justify-between items-center gap-4 p-3">
+        <div className="flex justify-between items-center gap-4 px-3 py-4">
           <TbChevronLeft
             size={28}
             className="text-white cursor-pointer"
             onClick={() => navigate('/', { replace: true })}
           />
-          <p className="text-white text-center font-semibold text-base">Đặt lịch</p>
+          <span className="text-white text-center font-semibold text-base">Đặt lịch</span>
           <div className="w-6"></div>
         </div>
         <div className="flex gap-3 justify-center flex-wrap text-white text-xs">
