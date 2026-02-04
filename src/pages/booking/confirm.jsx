@@ -6,7 +6,8 @@ import {
   TbChevronDown,
   TbChevronUp,
   TbCakeRoll,
-  TbTicket
+  TbTicket,
+  TbInfoHexagon
 } from 'react-icons/tb';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Table } from 'antd';
@@ -20,8 +21,6 @@ const confirm = () => {
   const { id } = useParams();
   const { order, court } = useOrderStore();
   const [expandedDates, setExpandedDates] = useState({});
-
-  console.log(order);
 
   const toggleDate = (date) => {
     setExpandedDates(prev => ({
@@ -141,14 +140,28 @@ const confirm = () => {
         </div>
       </div>
       <div className="px-3 py-2 space-y-2">
-        <span className="text-white text-sm flex items-center gap-1"><TbTicket size={18} />Ưu đãi</span>
-        <div className="flex flex-col bg-white rounded-xl p-3 shadow-lg text-secondary gap-2">
-          <span className="font-semibold">{court.name}</span>
-          <span className="text-sm">{court.address}</span>
+        <span className="text-white text-sm flex items-center gap-1"><TbInfoHexagon size={18} />Thông tin của bạn</span>
+        <div className="flex flex-col text-sm bg-white rounded-xl p-3 shadow-lg text-secondary gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <span className="font-semibold">Tên</span>
+            <span className="text-right">Cong Thanh Le</span>
+            <span className="font-semibold">Số điện thoại</span>
+            <span className="text-right">0392999678</span>
+          </div>
         </div>
+      </div>
+
+      <div className="px-3 py-4 mt-auto">
+        <button
+          onClick={() => navigate(`/booking/checkout/${id}`, { replace: true })}
+          className="w-full bg-yellow-400 hover:bg-emerald-800 text-secondary font-semibold py-3 px-6 rounded-xl shadow-lg transition-colors"
+        >
+          Xác nhận & Thanh toán
+        </button>
       </div>
     </div>
   );
 };
+
 
 export default confirm;

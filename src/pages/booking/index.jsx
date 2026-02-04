@@ -6,17 +6,19 @@ import dayjs from 'dayjs';
 import 'antd/dist/reset.css';
 import { FORMAT_CURRENCY } from '@/utils/format';
 import { useOrderStore } from '@/state/order';
+import { clear } from 'antd-mobile/es/components/dialog/clear';
 
 const BadmintonCourtBooking = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { order, setOrder, setCourt } = useOrderStore();
+  const { order, setOrder, setCourt, clearOrder } = useOrderStore();
 
   const [selectedSlotsByDate, setSelectedSlotsByDate] = useState({});
   const [cellWidth, setCellWidth] = useState(50);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const scrollContainerRef = useRef(null);
   const timeHeaderRef = useRef(null);
+  const scrollAnimationRef = useRef(null);
 
   const selectedSlots = selectedSlotsByDate[selectedDate.format('YYYY-MM-DD')] || [];
 
@@ -88,8 +90,12 @@ const BadmintonCourtBooking = () => {
   };
 
   const handleScroll = (e) => {
+    const scrollLeft = e.target.scrollLeft;
     if (timeHeaderRef.current) {
-      timeHeaderRef.current.scrollLeft = e.target.scrollLeft;
+      const headerContent = timeHeaderRef.current.firstChild;
+      if (headerContent) {
+        headerContent.style.transform = `translateX(-${scrollLeft}px)`;
+      }
     }
   };
 
@@ -311,7 +317,7 @@ const BadmintonCourtBooking = () => {
       totalPrice: calculateTotalPrice()
     });
     setCourt(courtSample);
-    navigate(`/booking/confirm/${id}`, { replace: true });
+    navigate(`/booking/confirm/${id}`);
   };
 
   useEffect(() => {
@@ -368,7 +374,10 @@ const BadmintonCourtBooking = () => {
           <TbChevronLeft
             size={28}
             className="text-white cursor-pointer"
-            onClick={() => navigate('/', { replace: true })}
+            onClick={() => {
+              clearOrder();
+              navigate('/', { replace: true });
+            }}
           />
           <span className="text-white text-center font-semibold text-base">Đặt lịch</span>
           <div className="w-6"></div>
@@ -411,12 +420,13 @@ const BadmintonCourtBooking = () => {
           <div className="flex-1 overflow-hidden relative">
             <div
               ref={timeHeaderRef}
-              className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              className="overflow-hidden"
             >
               <div
-                className="flex bg-teal-100 border-b border-gray-300 h-[50px]"
+                className="flex bg-teal-100 border-b border-gray-300 h-[50px] transition-transform duration-0"
                 style={{
-                  minWidth: `${timeSlots.length * cellWidth}px`
+                  minWidth: `${timeSlots.length * cellWidth}px`,
+                  willChange: 'transform'
                 }}
               >
                 {timeSlots.map((time, index) => (
