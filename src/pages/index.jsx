@@ -1,3 +1,4 @@
+import { use, useEffect } from 'react';
 import { getGreeting } from '@/utils';
 import { TbSearch, TbEaseInOutControlPoints  } from 'react-icons/tb';
 import { useUserStore } from '@/state/user';
@@ -5,9 +6,15 @@ import starBg from '@/assets/img/background/home.png';
 import { Input } from 'antd';
 import { courtList } from '@/mock/court';
 import CourtCard from '@/components/molecules/Court';
+import { useOrderStore } from '@/state/order';
 
 const index = () => {
   const { user } = useUserStore();
+  const { clearOrder } = useOrderStore();
+
+  useEffect(() => {
+    clearOrder();
+  }, []);
 
   return (
     <div className="flex flex-col items-center">
@@ -24,18 +31,18 @@ const index = () => {
             className="h-10 rounded-l-xl rounded-none"
             placeholder="Nhập tên sân, địa chỉ,..."
           />
-          <div className="bg-white bg-opacity-80 h-10 px-3 flex items-center">
+          <div className="bg-white bg-opacity-85 h-10 px-3 flex items-center">
             <TbSearch size={24} className=" text-emerald-700"/>
           </div>
-          <div className="bg-white bg-opacity-80 h-10 px-3 rounded-r-xl flex items-center">
+          <div className="bg-white bg-opacity-85 h-10 px-3 rounded-r-xl flex items-center">
             <TbEaseInOutControlPoints size={24} className=" text-emerald-700"/>
           </div>
         </div>
         <div className='flex mt-2 text-sm gap-3'>
-          <div className="bg-white bg-opacity-80 text-sm border rounded-lg text-secondary px-3 py-1">
+          <div className="bg-white bg-opacity-85 text-sm border rounded-lg text-secondary px-3 py-1">
             Sân gần tôi
           </div>
-          <div className="bg-white bg-opacity-80 text-sm border rounded-lg text-secondary px-3 py-1">
+          <div className="bg-white bg-opacity-85 text-sm border rounded-lg text-secondary px-3 py-1">
             Vé xé gần tôi
           </div>
         </div>

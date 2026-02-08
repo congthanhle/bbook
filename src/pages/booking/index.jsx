@@ -524,7 +524,7 @@ const BadmintonCourtBooking = () => {
             </div>
             <button
               onClick={() => handleSubmitBooking()}
-              className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-800 text-white rounded-lg font-semibold shadow-lg active:scale-95 transition-transform"
+              className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-800 text-white rounded-lg font-semibold shadow-lg active:scale-95 transition-transform uppercase"
             >
               Đặt sân
             </button>

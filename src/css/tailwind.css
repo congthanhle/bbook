@@ -30,7 +30,7 @@
 }
 
 .ant-input {
-  @apply h-10 px-4 text-secondary text-base border-none bg-white bg-opacity-80 !important;
+  @apply h-10 px-4 text-secondary text-base border-none bg-white bg-opacity-85 !important;
 }
 
 .ant-input-disabled{

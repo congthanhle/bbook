@@ -1,16 +1,27 @@
 import { TbHeart, TbMapPin2, TbClock, TbInfoOctagon } from 'react-icons/tb';
-import Sheet from '@/components/molecules/Court/Sheet';
+import InfoSheet from '@/components/molecules/Court/Sheet';
+import TicketSheet from '@/components/molecules/Court/Ticket';
 import { useSheetStore } from '@/state/sheet';
 import { useNavigate } from 'react-router-dom';
 
-const index = ({ court }) => {
+const index = ({ court, ticket = false }) => {
   const navigate = useNavigate();
   const { openSheet } = useSheetStore();
 
   const handleShowInfo = () => {
     openSheet({
-      children: <Sheet />,
+      children: <InfoSheet />,
     });
+  };
+
+  const handleNavigate = () => {
+    if (ticket){
+      openSheet({
+        children: <TicketSheet />,
+      });
+      return;
+    }
+    navigate(`/booking/${court.id}`);
   };
 
   return (
@@ -30,19 +41,19 @@ const index = ({ court }) => {
           </div>
         </div>
       </div>
-      <div className="space-y-1 p-2 gap-2">
-        <p className="font-semibold text-md">{court?.name}</p>
-        <p className="text-xs">{court?.address}</p>
-        <div className='flex justify-between items-center mt-2'>
+      <div className="p-2 gap-2 flex flex-col">
+        <span className="font-semibold text-md">{court?.name}</span>
+        <span className="text-xs">{court?.address}</span>
+        <div className='flex justify-between items-start'>
           <div className="flex items-center text-sm gap-1">
             <TbClock size={16}/>
             <span className="text-xs">{court?.openHours}</span>
           </div>
           <button
-            className="text-md font-semibold text-nowrap px-4 py-1 text-xs uppercase bg-yellow-400 rounded-md"
-            onClick={() => navigate(`/booking/${court.id}`)}
+            className="text-md font-semibold text-nowrap px-4 py-2 text-xs uppercase bg-yellow-400 rounded-md"
+            onClick={handleNavigate}
           >
-            Đặt lịch
+            {ticket ? 'Đăng ký vãng lai' : 'Đặt sân'}
           </button>
         </div>
       </div>

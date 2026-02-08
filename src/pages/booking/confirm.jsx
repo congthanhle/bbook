@@ -5,8 +5,6 @@ import {
   TbCalendar,
   TbChevronDown,
   TbChevronUp,
-  TbCakeRoll,
-  TbTicket,
   TbInfoHexagon
 } from 'react-icons/tb';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -153,8 +151,8 @@ const confirm = () => {
 
       <div className="px-3 py-4 mt-auto">
         <button
-          onClick={() => navigate(`/booking/checkout/${id}`, { replace: true })}
-          className="w-full bg-yellow-400 hover:bg-emerald-800 text-secondary font-semibold py-3 px-6 rounded-xl shadow-lg transition-colors"
+          onClick={() => navigate(`/booking/checkout/${id}`)}
+          className="w-full bg-yellow-400 hover:bg-emerald-800 text-secondary font-semibold py-3 px-6 rounded-xl shadow-lg transition-colors uppercase"
         >
           Xác nhận & Thanh toán
         </button>
