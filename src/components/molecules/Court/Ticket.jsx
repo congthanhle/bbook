@@ -1,8 +1,9 @@
 import { Tag } from 'antd';
 import { ticketList } from '@/mock/ticket';
-import { FORMAT_DATE, FORMAT_CURRENCY } from '@/utils/format';
+import { FORMAT_CURRENCY } from '@/utils/format';
 import { useNavigate } from 'react-router-dom';
 import { useSheetStore } from '@/state/sheet';
+import { useOrderStore } from '@/state/order';
 
 const Ticket = () => {
   const navigate = useNavigate();
@@ -25,8 +26,8 @@ const Ticket = () => {
           ticketList.map((ticket, index) => (
             <div key={index} className="border-b pb-3 mb-3">
               <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold text-black">{ticket.name}</span>
-                <span className="text-black text-xs">{ticket.code}</span>
+                <span className="font-semibold">{ticket.name}</span>
+                <span className="text-xs">{ticket.code}</span>
               </div>
               <div className="text-sm text-secondary flex justify-between">
                 <p>Sân: {ticket.court.join(', ')}</p>

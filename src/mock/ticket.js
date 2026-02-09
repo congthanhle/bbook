@@ -60,3 +60,20 @@ export const ticketList = [
     registerd: 2,
   }
 ];
+
+export const ticketItem = {
+  id: 1,
+  code: '#VA333',
+  name: 'Nhóm cầu lông An Phú',
+  court: [1, 2, 3],
+  date: '2025-06-20',
+  time: '15:00 - 17:00',
+  price: 65000,
+  note: 'Cầu 88, Trà đá miễn phí',
+  slots: 10,
+  registerd: 5,
+  courtInfo: {
+    name: 'Sân cầu lông An Phú',
+    address: '123 Đường ABC, Phường XYZ, Quận 1, TP.HCM',
+  },
+};
