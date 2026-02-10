@@ -65,7 +65,7 @@ const routes = [
   {
     path: '/booking-ticket/checkout/:id',
     key: 'booking_ticket_checkout',
-    component: <BookingCheckout />,
+    component: <BookingTicketCheckout />,
     isRootRouter: false,
   }
 ];
