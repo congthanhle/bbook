@@ -1,4 +1,5 @@
 import routes from '@/routes';
+import '@/service/map/leafletIcon';
 import { Page } from 'zmp-ui';
 import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
