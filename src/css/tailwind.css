@@ -38,11 +38,11 @@
 }
 
 .ant-select {
-  @apply h-12 w-48 border-black !important;
+  @apply h-10  !important;
 }
 
 .ant-select-selector {
-  @apply rounded-l-full px-4 text-base border border-black !important;
+  @apply px-4 text-base rounded-xl !important;
 }
 
 .custom-select > .ant-select-selector {
