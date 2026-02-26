@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { AutoComplete, Button } from 'antd';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { MdMyLocation } from 'react-icons/md';
 
 const searchCourtsAPI = async (searchTerm) => {
